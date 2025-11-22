@@ -60,12 +60,12 @@ class ProductPublicController extends Controller
     {
         $query = Product::query();
 
-        // Apply is_active filter only if column exists (some installs don't have it)
+        // is_active filter
         if (Schema::hasColumn('products', 'is_active')) {
             $query->where('is_active', true);
         }
 
-        // Keyword search across name, description and category (case-insensitive)
+        // Keyword search berdasarkan name, description, category (case-insensitive)
         if ($request->filled('q')) {
             $q = mb_strtolower($request->q);
             $query->where(function ($sub) use ($q) {
@@ -100,7 +100,7 @@ class ProductPublicController extends Controller
                 break;
         }
 
-        // Return same public catalog fields and pagination as `index`
+        // Mengembalikan fields katalog publik yang sama dan paginasi seperti `index`
         $products = $query->select(
             'id',
             'name',
