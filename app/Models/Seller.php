@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Seller extends Model
 {
@@ -68,5 +69,13 @@ class Seller extends Model
     public function village(): BelongsTo
     {
         return $this->belongsTo(\Laravolt\Indonesia\Models\Village::class, 'village_id', 'code');
+    }
+
+    /**
+     * Relasi ke Products milik Seller
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
     }
 }

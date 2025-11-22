@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProductPublicController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,13 @@ Route::middleware('api.auth')->prefix('seller')->group(function () {
     Route::post('/products/{product}', [ProductController::class, 'update']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| SELLER REPORT
+|--------------------------------------------------------------------------
+*/
+Route::get('/seller/report/pdf', [ReportController::class, 'sellerReport'])->middleware('api.auth');
 
 /*
 |--------------------------------------------------------------------------
