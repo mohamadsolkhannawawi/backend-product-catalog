@@ -14,10 +14,20 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi()
             ->prependToGroup('api', \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class);
+
+        // untuk Postman & Sanctum
+        $middleware->appendToGroup('api', \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class);
+
+        // session (wajib untuk Sanctum SPA)
+        $middleware->appendToGroup('api', \Illuminate\Session\Middleware\StartSession::class);
+
+        // CORS
         $middleware->use([
             \Illuminate\Http\Middleware\HandleCors::class,
         ]);
     })
+
+
 
     ->withExceptions(function (Exceptions $exceptions): void {
         //
