@@ -10,16 +10,25 @@ class Seller extends Model
     protected $fillable = [
         'user_id',
         'store_name',
+        'store_description',
         'phone',
-        'nid_number',
-        'nid_image_path',
+        'address',
+        'rt',
+        'rw',
         'province_id',
         'city_id',
         'district_id',
         'village_id',
-        'address',
+        'nid_number',
+        'ktp_number',
+        'nid_image_path',
+        'ktp_file_path',
+        'pic_file_path',
         'status',
+        'rejection_reason',
+        'verified_at',
     ];
+
 
     /**
      * Relasi ke User
