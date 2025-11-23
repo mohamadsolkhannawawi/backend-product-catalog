@@ -12,11 +12,13 @@ class Product extends Model
         'name',
         'slug',
         'description',
+        'category',
         'price',
         'stock',
-        'category',
         'images',
+        'is_active',
     ];
+
 
     protected $casts = [
         'images' => 'array', // JSON array

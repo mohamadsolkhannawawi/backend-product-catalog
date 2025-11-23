@@ -44,6 +44,8 @@ Route::middleware('api.auth')->prefix('seller')->group(function () {
     Route::get('/products/{product}', [ProductController::class, 'show']);
     Route::post('/products/{product}', [ProductController::class, 'update']);
     Route::delete('/products/{product}', [ProductController::class, 'destroy']);
+    Route::post('/products/{product}/activate', [ProductController::class, 'activate']);
+    Route::post('/products/{product}/deactivate', [ProductController::class, 'deactivate']);
 });
 
 /*

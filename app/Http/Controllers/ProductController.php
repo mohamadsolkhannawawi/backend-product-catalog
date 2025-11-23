@@ -117,6 +117,7 @@ class ProductController extends Controller
 
             'images'      => 'nullable|array',
             'images.*'    => 'image|mimes:jpg,jpeg,png|max:2048',
+            'is_active'   => 'nullable|boolean',
         ]);
 
         // Update optional fields
@@ -178,6 +179,38 @@ class ProductController extends Controller
         $product->delete();
 
         return response()->json(['message' => 'Product deleted']);
+    }
+
+    /**
+     * Non-aktifkan produk
+     */
+    public function deactivate(Request $request, Product $product)
+    {
+        $seller = Seller::where('user_id', $request->user()->id)->firstOrFail();
+
+        if ($product->seller_id !== $seller->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $product->update(['is_active' => false]);
+
+        return response()->json(['message' => 'Product deactivated']);
+    }
+
+    /**
+     * Aktifkan produk
+     */
+    public function activate(Request $request, Product $product)
+    {
+        $seller = Seller::where('user_id', $request->user()->id)->firstOrFail();
+
+        if ($product->seller_id !== $seller->id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $product->update(['is_active' => true]);
+
+        return response()->json(['message' => 'Product activated']);
     }
 }
 
