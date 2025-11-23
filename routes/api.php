@@ -10,6 +10,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\SellerDashboardController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,12 +67,23 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+/*
+|--------------------------------------------------------------------------
+| ADMIN DASHBOARD
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['api.auth', 'admin'])->group(function () {
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index']);
+});
+
+
+
 // NOTE: seller verification routes are handled by admin controllers below
 // (removed duplicate group that referenced wrong namespace)
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN SELLER MANAGEMENT
+| ADMIN MANAGEMENT
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'api.auth'])->prefix('admin')->group(function () {

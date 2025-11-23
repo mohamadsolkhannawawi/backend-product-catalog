@@ -31,7 +31,7 @@ class ProductPublicController extends Controller
     {
         $product = Product::where('slug', $slug)->firstOrFail();
 
-        $product->increment('views');
+        $product->increment('visitor');
 
         if (!$product) {
             return response()->json([

@@ -47,9 +47,9 @@ class SellerDashboardController extends Controller
             ->get(['id', 'name', 'slug', 'created_at']);
 
         // 6) Produk terpopuler berdasarkan views (dummy MVP)
-        $totalViews = Product::where('seller_id', $seller->id)->sum('views');
+        $totalVisitors = Product::where('seller_id', $seller->id)->sum('visitor');
         $topViewed = Product::where('seller_id', $seller->id)
-            ->orderBy('views', 'desc')
+            ->orderBy('visitor', 'desc')
             ->limit(5)
             ->get();
 
@@ -58,7 +58,7 @@ class SellerDashboardController extends Controller
             'review_count'        => $reviewCount,
             'average_rating'      => $averageRating,
             'positive_percentage' => $positivePercentage,
-            'total_views'         => $totalViews,
+            'total_visitors'      => $totalVisitors,
             'latest_products'     => $latestProducts,
         ]);
     }
