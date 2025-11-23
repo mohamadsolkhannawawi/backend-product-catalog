@@ -14,6 +14,14 @@ use Illuminate\Http\Request;
 
 class AdminSellerController extends Controller
 {
+    // List all sellers
+    public function index()
+    {
+        $sellers = Seller::with('user')->get();
+
+        return response()->json($sellers);
+    }
+
     // List pending sellers
     public function pending()
     {

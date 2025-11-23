@@ -11,6 +11,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\SellerDashboardController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminSellerManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,20 +78,19 @@ Route::middleware(['api.auth', 'admin'])->group(function () {
 });
 
 
-
-// NOTE: seller verification routes are handled by admin controllers below
-// (removed duplicate group that referenced wrong namespace)
-
 /*
 |--------------------------------------------------------------------------
-| ADMIN MANAGEMENT
+| ADMIN SELLER MANAGEMENT
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'api.auth'])->prefix('admin')->group(function () {
     Route::get('/sellers/pending', [AdminSellerController::class, 'pending']);
+    Route::get('/sellers', [AdminSellerController::class, 'index']);
     Route::get('/sellers/{seller}', [AdminSellerController::class, 'show']);
     Route::post('/sellers/{seller}/approve', [AdminSellerController::class, 'approve']);
     Route::post('/sellers/{seller}/reject', [AdminSellerController::class, 'reject']);
+    Route::post('/sellers/{seller}/activate', [AdminSellerManagementController::class, 'activate']);
+    Route::post('/sellers/{seller}/deactivate', [AdminSellerManagementController::class, 'deactivate']);
 });
 
 

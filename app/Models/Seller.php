@@ -28,6 +28,7 @@ class Seller extends Model
         'status',
         'rejection_reason',
         'verified_at',
+        'is_active',
     ];
 
 
