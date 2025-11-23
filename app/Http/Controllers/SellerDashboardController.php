@@ -40,21 +40,25 @@ class SellerDashboardController extends Controller
             ? round(($positiveReviews / $reviewCount) * 100, 2)
             : 0;
 
-        // 5) Total pengunjung produk (dummy MVP)
-        $totalVisitors = Product::where('seller_id', $seller->id)->sum('visitor_count');
-
-        // 6) Produk terbaru
+        // 5) Produk terbaru
         $latestProducts = Product::where('seller_id', $seller->id)
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get(['id', 'name', 'slug', 'created_at']);
+
+        // 6) Produk terpopuler berdasarkan views (dummy MVP)
+        $totalViews = Product::where('seller_id', $seller->id)->sum('views');
+        $topViewed = Product::where('seller_id', $seller->id)
+            ->orderBy('views', 'desc')
+            ->limit(5)
+            ->get();
 
         return response()->json([
             'product_count'       => $productCount,
             'review_count'        => $reviewCount,
             'average_rating'      => $averageRating,
             'positive_percentage' => $positivePercentage,
-            'total_visitors'      => $totalVisitors,
+            'total_views'         => $totalViews,
             'latest_products'     => $latestProducts,
         ]);
     }

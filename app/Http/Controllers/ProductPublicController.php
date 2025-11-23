@@ -29,7 +29,9 @@ class ProductPublicController extends Controller
 
     public function show($slug)
     {
-        $product = Product::where('slug', $slug)->first();
+        $product = Product::where('slug', $slug)->firstOrFail();
+
+        $product->increment('views');
 
         if (!$product) {
             return response()->json([
@@ -113,4 +115,5 @@ class ProductPublicController extends Controller
 
         return response()->json($products);
     }
+
 }

@@ -16,6 +16,7 @@ class Product extends Model
         'price',
         'stock',
         'images',
+        'views',
         'is_active',
     ];
 
@@ -23,6 +24,7 @@ class Product extends Model
     protected $casts = [
         'images' => 'array', // JSON array
         'price'  => 'decimal:2',
+        'views'  => 'integer',
     ];
 
     public function seller(): BelongsTo
