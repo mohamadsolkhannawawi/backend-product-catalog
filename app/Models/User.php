@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -23,6 +24,7 @@ class User extends Authenticatable
         'phone',
         'password',
         'role',
+        'user_id',
     ];
 
 
@@ -51,11 +53,33 @@ class User extends Authenticatable
 
     public function seller()
     {
-        return $this->hasOne(Seller::class);
+        // Seller table uses `user_id` as the foreign key and User uses `user_id` as its primary key
+        return $this->hasOne(Seller::class, 'user_id', 'user_id');
     }
 
     public function reviews()
     {
         return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Use user_id (UUID string) as primary key
+     */
+    protected $primaryKey = 'user_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->user_id)) {
+                $model->user_id = (string) Str::uuid();
+            }
+        });
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'user_id';
     }
 }

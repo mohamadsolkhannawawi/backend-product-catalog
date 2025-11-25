@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Seller extends Model
 {
+    use HasFactory;
     protected $fillable = [
         'user_id',
         'store_name',
@@ -20,11 +23,10 @@ class Seller extends Model
         'city_id',
         'district_id',
         'village_id',
-        'nid_number',
         'ktp_number',
-        'nid_image_path',
         'ktp_file_path',
         'pic_file_path',
+        'seller_id',
         'status',
         'rejection_reason',
         'verified_at',
@@ -37,7 +39,8 @@ class Seller extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        // Seller.user_id references users.user_id (both are UUID representative columns)
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
     /**
@@ -79,4 +82,25 @@ class Seller extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    protected static function booted()
+    {
+        static::creating(function ($model) {
+            if (empty($model->seller_id)) {
+                $model->seller_id = (string) Str::uuid();
+            }
+        });
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'seller_id';
+    }
+
+    /**
+     * Use seller_id as primary key
+     */
+    protected $primaryKey = 'seller_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
 }
