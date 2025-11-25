@@ -11,7 +11,7 @@ class SampleSellerSeeder extends Seeder
 {
     public function run()
     {
-        // Seller user
+        // Create a sample seller and associated user for development/demo
         $user = User::create([
             'name' => 'Sample Seller',
             'email' => 'seller@example.com',
@@ -21,7 +21,7 @@ class SampleSellerSeeder extends Seeder
         ]);
 
         Seller::create([
-            'user_id' => $user->id,
+            'user_id' => $user->user_id,
             'store_name' => 'Toko Contoh',
             'store_description' => 'Toko Contoh untuk demo.',
             'province_id' => '11',
