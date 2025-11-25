@@ -22,3 +22,6 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Ignore temporary storage used by tests/tools
+storage/tmp/
