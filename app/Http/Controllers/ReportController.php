@@ -16,7 +16,7 @@ class ReportController extends Controller
         $seller = Seller::where('user_id', $request->user()->user_id)
             ->with([
                 'products' => function ($q) {
-                    $q->select('id', 'seller_id', 'name', 'price', 'stock');
+                    $q->select('product_id', 'seller_id', 'name', 'price', 'stock');
                 }
             ])
             ->firstOrFail();
@@ -51,14 +51,20 @@ class ReportController extends Controller
 
         // If PDF requested, render PDF
         if ($request->query('format') === 'pdf') {
-            $html = view('pdf.admin-sellers', ['sellers' => $sellers])->render();
-            $dompdf = new Dompdf();
-            $dompdf->loadHtml($html);
-            $dompdf->render();
+            try {
+                $html = view('pdf.admin-sellers', ['sellers' => $sellers])->render();
+                $dompdf = new Dompdf();
+                $dompdf->loadHtml($html);
+                $dompdf->render();
 
-            return response($dompdf->output(), 200)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="platform-sellers.pdf"');
+                return response($dompdf->output(), 200)
+                    ->header('Content-Type', 'application/pdf')
+                    ->header('Content-Disposition', 'inline; filename="platform-sellers.pdf"');
+            } catch (\Exception $e) {
+                // Log and return JSON error for easier debugging from frontend
+                logger()->error('platformSellersReport PDF generation failed: ' . $e->getMessage(), ['exception' => $e]);
+                return response()->json(['error' => 'Failed to generate PDF: ' . $e->getMessage()], 500);
+            }
         }
 
         return response()->json(['data' => $sellers]);
@@ -73,14 +79,19 @@ class ReportController extends Controller
             ->get();
 
         if ($request->query('format') === 'pdf') {
-            $html = view('pdf.admin-sellers-by-province', ['data' => $data])->render();
-            $dompdf = new Dompdf();
-            $dompdf->loadHtml($html);
-            $dompdf->render();
+            try {
+                $html = view('pdf.admin-sellers-by-province', ['data' => $data])->render();
+                $dompdf = new Dompdf();
+                $dompdf->loadHtml($html);
+                $dompdf->render();
 
-            return response($dompdf->output(), 200)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="sellers-by-province.pdf"');
+                return response($dompdf->output(), 200)
+                    ->header('Content-Type', 'application/pdf')
+                    ->header('Content-Disposition', 'inline; filename="sellers-by-province.pdf"');
+            } catch (\Exception $e) {
+                logger()->error('platformSellersByProvinceReport PDF generation failed: ' . $e->getMessage(), ['exception' => $e]);
+                return response()->json(['error' => 'Failed to generate PDF: ' . $e->getMessage()], 500);
+            }
         }
 
         return response()->json(['data' => $data]);
@@ -88,7 +99,7 @@ class ReportController extends Controller
 
     public function platformTopRatedProductsReport(Request $request)
     {
-        $data = Product::with(['seller:seller_id,store_name', 'category:category_id,name'])
+        $data = Product::with(['seller:seller_id,store_name,province_id', 'category:category_id,name'])
             ->select('products.product_id','products.name','products.category_id','products.price','products.seller_id', DB::raw('COALESCE(AVG(reviews.rating),0) as avg_rating'))
             ->leftJoin('reviews', 'reviews.product_id', '=', 'products.product_id')
             ->where('products.is_active', true)
@@ -96,15 +107,28 @@ class ReportController extends Controller
             ->orderByDesc('avg_rating')
             ->get();
 
-        if ($request->query('format') === 'pdf') {
-            $html = view('pdf.admin-top-rated-products', ['data' => $data])->render();
-            $dompdf = new Dompdf();
-            $dompdf->loadHtml($html);
-            $dompdf->render();
+        // Add reviewer province info to each product (province where highest/latest review came from)
+        $data->each(function ($product) {
+            $reviewerProvince = Review::where('product_id', $product->product_id)
+                ->orderByDesc('created_at')
+                ->value('province_id') ?? 'N/A';
+            $product->reviewer_province = $reviewerProvince;
+        });
 
-            return response($dompdf->output(), 200)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="top-rated-products.pdf"');
+        if ($request->query('format') === 'pdf') {
+            try {
+                $html = view('pdf.admin-top-rated-products', ['data' => $data])->render();
+                $dompdf = new Dompdf();
+                $dompdf->loadHtml($html);
+                $dompdf->render();
+
+                return response($dompdf->output(), 200)
+                    ->header('Content-Type', 'application/pdf')
+                    ->header('Content-Disposition', 'inline; filename="top-rated-products.pdf"');
+            } catch (\Exception $e) {
+                logger()->error('platformTopRatedProductsReport PDF generation failed: ' . $e->getMessage(), ['exception' => $e]);
+                return response()->json(['error' => 'Failed to generate PDF: ' . $e->getMessage()], 500);
+            }
         }
 
         return response()->json(['data' => $data]);

@@ -80,41 +80,23 @@
         </thead>
         <tbody>
             @php
-                // Group by province for rating source
-                $groupedProducts = collect($data)
-                    ->groupBy(function ($product) {
-                        // Get province from reviews (where rating comes from)
-                        $province = \DB::table('reviews')
-                            ->where('product_id', $product->product_id)
-                            ->first()?->province_id;
-                        
-                        if ($province) {
-                            return \DB::table('lv_provinces')
-                                ->where('code', $province)
-                                ->value('name') ?? $province;
-                        }
-                        
-                        // Fallback to seller's province
-                        return \DB::table('lv_provinces')
-                            ->where('code', $product->seller->province_id ?? '')
-                            ->value('name') ?? 'N/A';
-                    })
-                    ->sortKeys();
                 $counter = 0;
             @endphp
-            @forelse($groupedProducts as $province => $products)
-                @foreach($products as $product)
-                    @php $counter++ @endphp
-                    <tr>
-                        <td>{{ $counter }}</td>
-                        <td>{{ substr($product->name, 0, 30) }}{{ strlen($product->name) > 30 ? '...' : '' }}</td>
-                        <td>{{ $product->category?->name ?? 'N/A' }}</td>
-                        <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
-                        <td>{{ number_format($product->avg_rating, 1) }}/5</td>
-                        <td>{{ $product->seller?->store_name ?? 'N/A' }}</td>
-                        <td>{{ $province }}</td>
-                    </tr>
-                @endforeach
+            @forelse($data as $product)
+                @php 
+                    $counter++;
+                    // Get reviewer's province from reviews (where rating comes from)
+                    $reviewerProvince = $product->reviewer_province ?? 'N/A';
+                @endphp
+                <tr>
+                    <td>{{ $counter }}</td>
+                    <td>{{ substr($product->name, 0, 30) }}{{ strlen($product->name) > 30 ? '...' : '' }}</td>
+                    <td>{{ $product->category?->name ?? 'N/A' }}</td>
+                    <td>Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                    <td>{{ number_format($product->avg_rating, 1) }}/5</td>
+                    <td>{{ $product->seller?->store_name ?? 'N/A' }}</td>
+                    <td>{{ $reviewerProvince }}</td>
+                </tr>
             @empty
                 <tr>
                     <td colspan="7" style="text-align: center;">Tidak ada data</td>

@@ -178,7 +178,6 @@ php artisan serve
 
 Server akan berjalan di: `http://localhost:8000`
 
-
 ## 📁 Struktur Project
 
 ```
@@ -299,6 +298,132 @@ php artisan serve --port=8001
 php artisan migrate:fresh --seed
 ```
 
+## 🤝 Kolaborasi
+
+### Langkah-langkah Kolaborasi
+
+1. **Clone Repository Utama** (bukan fork):
+
+    ```bash
+    git clone https://github.com/mohamadsolkhannawawi/backend-product-catalog.git
+    cd backend-product-catalog
+    ```
+
+2. **Create Branch Baru untuk fitur/fix**:
+
+    ```bash
+    git checkout -b feature/nama-fitur
+    ```
+
+    **Naming convention:**
+
+    - `feature/nama-fitur` - untuk fitur baru
+    - `fix/deskripsi-bug` - untuk bug fixes
+    - `docs/deskripsi-doc` - untuk dokumentasi
+    - `refactor/deskripsi` - untuk refactoring
+
+3. **Develop dan Commit Changes**:
+
+    ```bash
+    # Check status
+    git status
+
+    # Stage changes
+    git add .
+
+    # Commit dengan format yang benar
+    git commit -m "feat(scope): description"
+    ```
+
+4. **Push ke Repository**:
+
+    ```bash
+    git push origin feature/nama-fitur
+    ```
+
+5. **Create Pull Request**:
+    - Go to: https://github.com/mohamadsolkhannawawi/backend-product-catalog/pulls
+    - Click "New Pull Request"
+    - Select branch Anda sebagai source
+    - Add deskripsi lengkap
+    - Submit dan tunggu review dari tim
+
+### Git Commit Format
+
+**Format**: `type(scope): message`
+
+**Type:**
+
+-   `feat` - feature baru
+-   `fix` - bug fix
+-   `docs` - dokumentasi
+-   `style` - formatting, tidak ada logic change
+-   `refactor` - refactor code
+-   `perf` - performance improvement
+-   `test` - test related
+-   `chore` - build process, dependencies
+
+**Scope**: area yang di-affect
+
+-   `auth` - authentication
+-   `product` - product model & controller
+-   `seller` - seller model & controller
+-   `admin` - admin features
+-   `dashboard` - dashboard endpoints
+-   `report` - report generation
+-   `middleware` - middleware
+-   `migration` - database migrations
+-   `config` - configuration
+
+**Message**: Deskripsi singkat dalam bahasa Inggris
+
+**Contoh:**
+
+```
+feat(product): add category filter to products
+fix(dashboard): fix ambiguous column error
+docs(readme): update setup instructions
+refactor(auth): simplify token validation
+chore(deps): upgrade laravel to 11.1
+```
+
+### Workflow Tim
+
+```bash
+# 1. Update dari main branch sebelum develop
+git fetch origin
+git pull origin main
+
+# 2. Buat branch fitur
+git checkout -b feature/xyz
+
+# 3. Develop dan test
+php artisan serve
+# ... buat perubahan ...
+
+# 4. Test dengan Postman atau curl
+curl http://localhost:8000/api/endpoint
+
+# 5. Commit reguler dengan format yang benar
+git add .
+git commit -m "feat(xyz): add xyz feature"
+
+# 6. Push ke origin
+git push origin feature/xyz
+
+# 7. Create PR dan minta review dari tim
+```
+
+### Best Practices
+
+-   Selalu pull dari `main` sebelum membuat branch baru
+-   1 branch = 1 fitur/fix
+-   Commit messages harus jelas dan deskriptif
+-   Push changes secara regular
+-   Jangan langsung merge ke main, selalu via PR dengan review
+-   Test fitur dengan Postman sebelum push
+-   Pastikan database migration berjalan tanpa error
+-   Write clean code dan follow Laravel conventions
 
 ## 📄 Lisensi
 
