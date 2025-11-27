@@ -47,7 +47,14 @@ class ReviewThankYouNotification extends Notification implements ShouldQueue
             $mail->line('Rating: ' . $this->reviewSnapshot['rating']);
         }
 
-        $mail->action('Kunjungi Produk', url('/'))
+        // Build product detail URL using product slug
+        $productUrl = url('/');
+        if (!empty($this->reviewSnapshot['product_slug'])) {
+            $frontendUrl = config('app.frontend_url') ?: config('app.url');
+            $productUrl = $frontendUrl . '/products/' . $this->reviewSnapshot['product_slug'];
+        }
+
+        $mail->action('Kunjungi Produk', $productUrl)
              ->line('Terima kasih sudah menggunakan aplikasi kami!');
 
         return $mail;

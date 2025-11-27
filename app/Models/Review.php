@@ -49,14 +49,22 @@ class Review extends Model
     public function toSnapshot(): array
     {
         $productName = null;
+        $productSlug = null;
         if ($this->relationLoaded('product')) {
-            $productName = $this->product ? $this->product->name : null;
+            if ($this->product) {
+                $productName = $this->product->name;
+                $productSlug = $this->product->slug;
+            }
         } else {
-            // attempt to get product name without forcing heavy operations
+            // attempt to get product data without forcing heavy operations
             try {
-                $productName = $this->product ? $this->product->name : null;
+                if ($this->product) {
+                    $productName = $this->product->name;
+                    $productSlug = $this->product->slug;
+                }
             } catch (\Throwable $e) {
                 $productName = null;
+                $productSlug = null;
             }
         }
 
@@ -64,8 +72,10 @@ class Review extends Model
             'review_id' => $this->review_id,
             'product_id' => $this->product_id,
             'product_name' => $productName,
+            'product_slug' => $productSlug,
             'name' => $this->name,
             'email' => $this->email,
+            'phone' => $this->phone,
             'rating' => $this->rating !== null ? (int) $this->rating : null,
             'comment' => $this->comment,
             'province_id' => $this->province_id,
