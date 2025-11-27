@@ -55,3 +55,4 @@ class AdminSellerManagementController extends Controller
             'seller' => $seller,
         ]);
     }
+}
