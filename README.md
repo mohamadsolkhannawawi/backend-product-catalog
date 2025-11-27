@@ -1,59 +1,309 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Product Catalog - Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend API untuk Platform Marketplace Product Catalog yang dibangun dengan Laravel 11.
 
-## About Laravel
+## 📋 Daftar Isi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+-   [Prasyarat](#prasyarat)
+-   [Instalasi](#instalasi)
+-   [Konfigurasi](#konfigurasi)
+-   [Menjalankan Aplikasi](#menjalankan-aplikasi)
+-   [Testing API](#testing-api)
+-   [Struktur Project](#struktur-project)
+-   [Fitur Utama](#fitur-utama)
+-   [Troubleshooting](#troubleshooting)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 🛠️ Prasyarat
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Pastikan komputer Anda memiliki tools berikut dengan versi minimal yang ditentukan:
 
-## Learning Laravel
+### 1. PHP
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+php --version
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Versi yang diperlukan: PHP 8.2 atau lebih tinggi**
 
-## Laravel Sponsors
+Download dari: https://www.php.net/downloads
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 2. Composer
 
-### Premium Partners
+```bash
+composer --version
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+**Versi yang diperlukan: Composer 2.0 atau lebih tinggi**
 
-## Contributing
+Download dari: https://getcomposer.org/download/
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. PostgreSQL
 
-## Code of Conduct
+```bash
+psql --version
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Versi yang diperlukan: PostgreSQL 12 atau lebih tinggi**
 
-## Security Vulnerabilities
+Download dari: https://www.postgresql.org/download/
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4. Git
 
-## License
+```bash
+git --version
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Versi yang diperlukan: Git 2.20 atau lebih tinggi**
+
+Download dari: https://git-scm.com/downloads
+
+### 5. Node.js (Optional, untuk frontend development)
+
+```bash
+node --version
+npm --version
+```
+
+**Versi yang diperlukan: Node.js 16 atau lebih tinggi, npm 7 atau lebih tinggi**
+
+Download dari: https://nodejs.org/
+
+## 📥 Instalasi
+
+### Step 1: Clone Repository
+
+```bash
+git clone https://github.com/mohamadsolkhannawawi/backend-product-catalog.git
+cd backend-product-catalog
+```
+
+### Step 2: Install Dependencies
+
+```bash
+composer install
+```
+
+### Step 3: Setup Environment File
+
+Copy file `.env.example` menjadi `.env`:
+
+```bash
+cp .env.example .env
+```
+
+### Step 4: Generate Application Key
+
+```bash
+php artisan key:generate
+```
+
+## ⚙️ Konfigurasi
+
+### 1. Konfigurasi Database
+
+Edit file `.env` dan atur parameter database:
+
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=product_catalog
+DB_USERNAME=postgres
+DB_PASSWORD=your_password
+```
+
+**Langkah-langkah:**
+
+1. Buka pgAdmin atau terminal PostgreSQL
+2. Buat database baru:
+
+```sql
+CREATE DATABASE product_catalog;
+```
+
+3. Update `.env` dengan username dan password PostgreSQL Anda
+
+### 2. Konfigurasi Email (Optional)
+
+Untuk fitur email notifications, update di `.env`:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=your_username
+MAIL_PASSWORD=your_password
+MAIL_FROM_ADDRESS=noreply@productcatalog.com
+```
+
+### 3. Konfigurasi Frontend URL
+
+```env
+FRONTEND_URL=http://localhost:5173
+APP_URL=http://localhost:8000
+```
+
+## 🚀 Menjalankan Aplikasi
+
+### Step 1: Jalankan Database Migration
+
+```bash
+php artisan migrate
+```
+
+### Step 2: Seed Database (Optional - untuk data dummy)
+
+```bash
+php artisan db:seed
+```
+
+### Step 3: Generate Storage Symbolic Link
+
+```bash
+php artisan storage:link
+```
+
+### Step 4: Clear Cache
+
+```bash
+php artisan cache:clear
+php artisan config:clear
+```
+
+### Step 5: Jalankan Development Server
+
+```bash
+php artisan serve
+```
+
+Server akan berjalan di: `http://localhost:8000`
+
+
+## 📁 Struktur Project
+
+```
+backend/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/        # API Controllers
+│   │   ├── Middleware/         # Custom Middleware
+│   │   └── Requests/           # Form Validation
+│   ├── Models/                 # Eloquent Models
+│   ├── Notifications/          # Email Notifications
+│   └── Services/               # Business Logic
+├── database/
+│   ├── migrations/             # Database Migrations
+│   ├── seeders/                # Database Seeders
+│   └── factories/              # Model Factories
+├── routes/
+│   ├── api.php                 # API Routes
+│   ├── web.php                 # Web Routes
+│   └── channels.php            # Broadcasting Channels
+├── resources/
+│   ├── views/                  # Blade Templates
+│   └── lang/                   # Language Files
+├── storage/                    # Storage (logs, uploads)
+├── tests/                      # Unit & Feature Tests
+├── config/                     # Configuration Files
+├── .env.example                # Environment Template
+├── artisan                     # Laravel CLI
+└── composer.json               # PHP Dependencies
+```
+
+## ✨ Fitur Utama
+
+### Authentication
+
+-   Register pengguna baru
+-   Login dengan email & password
+-   Token-based authentication (Sanctum)
+-   Logout
+
+### Product Management (Seller)
+
+-   Create, Read, Update, Delete produk
+-   Upload multiple images
+-   Kategori produk
+-   Activate/Deactivate produk
+-   Manage stok
+
+### Reviews & Ratings
+
+-   Pelanggan dapat memberikan rating & review
+-   Rating berdasarkan provinsi pemberi review
+-   Notifikasi email ke seller
+
+### Dashboard
+
+**Seller Dashboard:**
+
+-   Overview penjualan
+-   Grafik stok per produk
+-   Grafik rating per produk
+-   Grafik lokasi pemberi rating
+-   Generate laporan PDF (Stok, Rating, Restock)
+
+**Admin Dashboard:**
+
+-   Grafik produk per kategori
+-   Grafik toko per provinsi
+-   Statistik seller (aktif/tidak aktif)
+-   Total pemberi rating
+-   Manage seller status
+-   Generate laporan PDF
+
+### Reports
+
+-   Laporan stok produk
+-   Laporan rating produk
+-   Laporan restock
+-   Laporan seller
+-   Laporan produk tertinggi
+
+## 🐛 Troubleshooting
+
+### Error: "Class not found"
+
+```bash
+composer dump-autoload
+```
+
+### Error: "SQLSTATE[08006]"
+
+-   Pastikan PostgreSQL sudah berjalan
+-   Cek konfigurasi database di `.env`
+-   Test koneksi: `php artisan tinker` → `DB::connection()->getPDO()`
+
+### Error: "Storage disk not found"
+
+```bash
+php artisan storage:link
+```
+
+### Error: "Key not generated"
+
+```bash
+php artisan key:generate
+```
+
+### Port 8000 sudah terpakai
+
+```bash
+# Jalankan di port berbeda
+php artisan serve --port=8001
+```
+
+### Database belum ter-migrate
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+
+## 📄 Lisensi
+
+Project ini dilindungi oleh lisensi MIT.
+
+---
+
+**Happy Coding! 🚀**
