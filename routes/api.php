@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ValidationController;
 use App\Http\Controllers\ProductPublicController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReportController;
@@ -27,6 +29,11 @@ Route::prefix('auth')->group(function () {
         Route::get('/me',        [AuthController::class, 'me']);
     });
 });
+
+// Public routes (no auth required)
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/validate/unique', [ValidationController::class, 'unique']);
 
 // Authenticated users review products
 Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
@@ -108,6 +115,7 @@ Route::prefix('dashboard/admin')->middleware(['auth:sanctum', 'role:admin'])->gr
     Route::post('/sellers/{seller}/reject', [AdminSellerController::class, 'reject']);
     Route::post('/sellers/{seller}/activate', [AdminSellerManagementController::class, 'activate']);
     Route::post('/sellers/{seller}/deactivate', [AdminSellerManagementController::class, 'deactivate']);
+    Route::patch('/sellers/{seller}/toggle-status', [AdminSellerManagementController::class, 'toggleStatus']);
     Route::get('/sellers/{seller}/ktp', [AdminSellerController::class, 'ktpFile']);
     Route::get('/sellers/{seller}/pic', [AdminSellerController::class, 'picFile']);
 
@@ -135,6 +143,12 @@ Route::prefix('locations')->group(function () {
     Route::get('/cities/{city}/districts',         [LocationController::class, 'districts']);
     Route::get('/districts/{district}/villages',      [LocationController::class, 'villages']);
 });
+
+// Categories (public)
+Route::get('/categories', [CategoryController::class, 'index']);
+
+// Validation helpers (frontend async checks)
+Route::post('/validate/unique', [ValidationController::class, 'unique']);
 
 
 /*

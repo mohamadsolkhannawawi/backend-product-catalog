@@ -123,10 +123,14 @@ class AuthController extends Controller
             'status'           => 'pending',
             ]);
 
+            // Generate Sanctum Bearer Token for immediate login after registration
+            $token = $user->createToken('auth-token')->plainTextToken;
+
             return response()->json([
-            'message' => 'Registration submitted. Awaiting admin approval.',
-            'user'    => $user,
-            'seller'  => $seller,
+                'message' => 'Registration submitted. Awaiting admin approval.',
+                'user'    => $user,
+                'seller'  => $seller,
+                'token'   => $token,
             ], 201);
         });
     }
@@ -251,18 +255,25 @@ class AuthController extends Controller
         }
 
         // After successful authentication, enforce seller approval policy:
-        // If the user is a seller and their seller record is not approved, deny login.
+        // If the user is a seller and their seller record is not active, deny login.
         $user = Auth::user();
         if ($user && $user->role === 'seller') {
             $seller = $user->seller;
-            if ($seller && $seller->status !== 'approved') {
+            if ($seller && $seller->status !== 'active') {
                 // Log out and deny access
                 Auth::guard('web')->logout();
                 return response()->json(['message' => 'Account pending approval by admin'], 403);
             }
         }
 
-        return response()->json(['message' => 'Logged in']);
+        // Generate Sanctum token for API authentication
+        $token = $user->createToken('auth-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Logged in',
+            'token'   => $token,
+            'user'    => $user,
+        ]);
     }
 
     public function me(Request $request)

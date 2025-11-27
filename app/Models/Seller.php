@@ -80,7 +80,7 @@ class Seller extends Model
      */
     public function products(): HasMany
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(Product::class, 'seller_id', 'seller_id');
     }
 
     protected static function booted()

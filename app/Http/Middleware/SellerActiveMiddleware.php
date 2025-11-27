@@ -27,7 +27,7 @@ class SellerActiveMiddleware
             return response()->json(['message' => 'Seller profile not found'], 403);
         }
 
-        if ($seller->status !== 'approved' || !$seller->is_active) {
+        if ($seller->status !== 'active' || !$seller->is_active) {
             return response()->json(['message' => 'Seller account not active or not approved'], 403);
         }
 
