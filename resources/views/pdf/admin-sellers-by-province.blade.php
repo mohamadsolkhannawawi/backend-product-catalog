@@ -78,9 +78,11 @@
         <tbody>
             @php
                 // Group by province and sort
+                $tablePrefix = config('laravolt.indonesia.table_prefix', 'indonesia_');
+                $provincesTable = $tablePrefix . 'provinces';
                 $groupedSellers = collect($data)
-                    ->groupBy(function ($seller) {
-                        return \DB::table('lv_provinces')
+                    ->groupBy(function ($seller) use ($provincesTable) {
+                        return \DB::table($provincesTable)
                             ->where('code', $seller->province_id)
                             ->value('name') ?? $seller->province_id;
                     })
