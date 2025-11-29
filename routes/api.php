@@ -11,6 +11,8 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\SellerDashboardController;
+use App\Http\Controllers\Seller\SellerPdfReportController;
+use App\Http\Controllers\Admin\PdfReportController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminSellerManagementController;
 
@@ -33,7 +35,7 @@ Route::prefix('auth')->group(function () {
 // Public routes (no auth required)
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/validate/unique', [ValidationController::class, 'unique']);
+Route::get('/check-unique', [ValidationController::class, 'unique']);
 
 // Authenticated users review products
 Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
@@ -87,9 +89,16 @@ Route::prefix('dashboard/seller')->middleware(['auth:sanctum', 'role:seller', 's
     Route::get('/charts/rating-per-product', [SellerDashboardController::class, 'ratingPerProduct']);
     Route::get('/charts/reviewers-by-province', [SellerDashboardController::class, 'reviewersByProvince']);
 
+    // Legacy JSON reports (for backward compatibility)
     Route::get('/reports/stock', [ReportController::class, 'sellerStockReport']);
     Route::get('/reports/top-rated', [ReportController::class, 'sellerTopRatedReport']);
     Route::get('/reports/restock', [ReportController::class, 'sellerRestockReport']);
+
+    // Seller PDF report endpoints (SRS-MartPlace-12..14)
+    Route::post('/reports/download/stock', [SellerPdfReportController::class, 'stockReport']);
+    Route::post('/reports/download/top-rated', [SellerPdfReportController::class, 'topRatedReport']);
+    Route::post('/reports/download/restock', [SellerPdfReportController::class, 'restockReport']);
+    Route::get('/reports/view', [SellerPdfReportController::class, 'viewReport']);
 });
 
 
@@ -125,8 +134,13 @@ Route::prefix('dashboard/admin')->middleware(['auth:sanctum', 'role:admin'])->gr
     Route::get('/charts/sellers-status', [AdminDashboardController::class, 'sellersStatus']);
     Route::get('/charts/total-reviewers', [AdminDashboardController::class, 'totalReviewers']);
 
-    // Admin report PDFs (SRS-09..SRS-11)
-    Route::get('/reports/sellers', [ReportController::class, 'platformSellersReport']); // ?status=active|inactive
+    // Admin PDF Reports (SRS-MartPlace-09..11)
+    Route::post('/reports/sellers-by-status', [PdfReportController::class, 'sellersByStatusReport']);
+    Route::post('/reports/sellers-by-province', [PdfReportController::class, 'sellersByProvinceReport']);
+    Route::post('/reports/products-by-rating', [PdfReportController::class, 'productsByRatingReport']);
+
+    // Legacy JSON reports (for backward compatibility)
+    Route::get('/reports/sellers', [ReportController::class, 'platformSellersReport']);
     Route::get('/reports/sellers-by-province', [ReportController::class, 'platformSellersByProvinceReport']);
     Route::get('/reports/top-rated-products', [ReportController::class, 'platformTopRatedProductsReport']);
 });
@@ -149,6 +163,8 @@ Route::get('/categories', [CategoryController::class, 'index']);
 
 // Validation helpers (frontend async checks)
 Route::post('/validate/unique', [ValidationController::class, 'unique']);
+// Allow GET for convenience (frontend uses query params)
+Route::get('/validate/unique', [ValidationController::class, 'unique']);
 
 
 /*
