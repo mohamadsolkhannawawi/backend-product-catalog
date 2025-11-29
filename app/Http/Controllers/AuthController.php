@@ -106,6 +106,8 @@ class AuthController extends Controller
             'user_id'          => $user->user_id,
             'store_name'       => $validated['store_name'],
             'store_description'=> $validated['store_description'] ?? null,
+            'phone'            => $validated['pic_phone'] ?? null,
+            'pic_name'         => $validated['pic_name'],
 
             'address'          => $validated['address'],
             'rt'               => $validated['rt'],
@@ -214,6 +216,8 @@ class AuthController extends Controller
                 'user_id'          => $user->user_id,
                 'store_name'       => $validated['store_name'],
                 'store_description'=> $validated['store_description'] ?? null,
+                'phone'            => $validated['pic_phone'] ?? null,
+                'pic_name'         => $validated['pic_name'],
 
                 'address'          => $validated['address'],
                 'rt'               => $validated['rt'],

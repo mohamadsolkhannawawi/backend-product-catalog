@@ -16,6 +16,7 @@ class Seller extends Model
         'store_name',
         'store_description',
         'phone',
+        'pic_name',
         'address',
         'rt',
         'rw',
