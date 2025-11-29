@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\URL;
 
 class SellerApproved extends Notification implements ShouldQueue
 {
@@ -27,20 +28,19 @@ class SellerApproved extends Notification implements ShouldQueue
 
     public function toMail($notifiable)
     {
-        $mail = (new MailMessage)
-            ->subject('Akun Seller Anda Disetujui')
-            ->greeting("Halo {$notifiable->name},")
-            ->line('Selamat! Pengajuan seller Anda telah disetujui oleh tim kami. Silakan verifikasi melalui tombol di bawah untuk mengaktifkan akun Anda.');
+        // Generate signed URL for activation with user ID
+        $activateUrl = URL::signedRoute('seller.activate', [
+            'user_id' => $notifiable->id
+        ]);
 
-        if (!empty($this->sellerSnapshot['company_name'])) {
-            $mail->line('Nama Perusahaan: ' . $this->sellerSnapshot['company_name']);
-        }
-
-           $actionUrl = $this->signedUrl ?? url('/activate-seller?user=' . $notifiable->user_id);
-
-           $mail->action('Verifikasi & Aktifkan Akun', $actionUrl)
-               ->line('Setelah Anda klik tombol verifikasi, akun Anda akan aktif dan Anda dapat login.');
-
-        return $mail;
+        return (new MailMessage)
+            ->subject('Selamat! Toko Anda telah aktif.')
+            ->view('emails.seller-approved', [
+                'sellerName' => $notifiable->name,
+                'storeName' => $this->sellerSnapshot['store_name'] ?? $this->sellerSnapshot['company_name'] ?? 'Toko Anda',
+                'activateUrl' => $activateUrl,
+                'helpUrl' => url('/help'),
+                'privacyUrl' => url('/privacy'),
+            ]);
     }
 }

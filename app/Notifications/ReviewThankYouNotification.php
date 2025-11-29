@@ -12,13 +12,15 @@ class ReviewThankYouNotification extends Notification implements ShouldQueue
     use Queueable;
 
     public $reviewSnapshot;
+    public $reviewerName;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(array $reviewSnapshot = [])
+    public function __construct(array $reviewSnapshot = [], $notifiable = null)
     {
         $this->reviewSnapshot = $reviewSnapshot;
+        $this->reviewerName = $notifiable->name ?? 'Reviewer';
     }
 
     /**
@@ -36,28 +38,19 @@ class ReviewThankYouNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $mail = (new MailMessage);
-
-        $mail->line('Terima kasih atas review Anda.');
-
-        if (!empty($this->reviewSnapshot['product_name'])) {
-            $mail->line('Produk: ' . $this->reviewSnapshot['product_name']);
-        }
-        if (!empty($this->reviewSnapshot['rating'])) {
-            $mail->line('Rating: ' . $this->reviewSnapshot['rating']);
-        }
-
-        // Build product detail URL using product slug
-        $productUrl = url('/');
-        if (!empty($this->reviewSnapshot['product_slug'])) {
-            $frontendUrl = config('app.frontend_url') ?: config('app.url');
-            $productUrl = $frontendUrl . '/products/' . $this->reviewSnapshot['product_slug'];
-        }
-
-        $mail->action('Kunjungi Produk', $productUrl)
-             ->line('Terima kasih sudah menggunakan aplikasi kami!');
-
-        return $mail;
+        $frontendUrl = config('app.frontend_url') ?: config('app.url');
+        
+        return (new MailMessage)
+            ->subject('Terima kasih atas ulasan Anda!')
+            ->view('emails.review-thank-you', [
+                'reviewerName' => $this->reviewerName,
+                'productName' => $this->reviewSnapshot['product_name'] ?? 'Produk',
+                'reviewText' => $this->reviewSnapshot['comment'] ?? 'Ulasan Anda',
+                'reviewUrl' => $frontendUrl . '/products/' . ($this->reviewSnapshot['product_slug'] ?? $this->reviewSnapshot['product_id'] ?? '#'),
+                'shopUrl' => $frontendUrl . '/catalog',
+                'helpUrl' => url('/help'),
+                'privacyUrl' => url('/privacy'),
+            ]);
     }
 
     /**

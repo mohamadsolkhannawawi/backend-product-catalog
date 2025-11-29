@@ -27,22 +27,17 @@ class SellerRejected extends Notification implements ShouldQueue
 
     public function toMail($notifiable)
     {
-        $mail = (new MailMessage)
-            ->subject('Pendaftaran Seller Ditolak')
-            ->greeting("Halo {$notifiable->name},")
-            ->line('Maaf, pengajuan seller Anda tidak dapat kami setujui.');
+        $reapplyUrl = url('/register');
 
-        if ($this->reason) {
-            $mail->line('Alasan: ' . $this->reason);
-        }
-
-        if (!empty($this->sellerSnapshot['company_name'])) {
-            $mail->line('Nama Perusahaan: ' . $this->sellerSnapshot['company_name']);
-        }
-
-        $mail->action('Daftar Ulang Seller', url('/register-seller'))
-             ->line('Silakan lengkapi data dan coba daftar kembali.');
-
-        return $mail;
+        return (new MailMessage)
+            ->subject('Pembaruan status pendaftaran toko Anda.')
+            ->view('emails.seller-rejected', [
+                'sellerName' => $notifiable->name,
+                'storeName' => $this->sellerSnapshot['store_name'] ?? $this->sellerSnapshot['company_name'] ?? 'Toko Anda',
+                'rejectionReason' => $this->reason ?? 'Data pendaftaran tidak memenuhi kriteria kami.',
+                'reapplyUrl' => $reapplyUrl,
+                'helpUrl' => url('/help'),
+                'privacyUrl' => url('/privacy'),
+            ]);
     }
 }
