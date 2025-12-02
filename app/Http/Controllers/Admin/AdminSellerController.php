@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Notifications\SellerApproved;
 use App\Notifications\SellerRejected;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 class AdminSellerController extends Controller
@@ -66,9 +67,19 @@ class AdminSellerController extends Controller
             try {
                 $user = $seller->user;
                 if ($user) {
-                    $user->notify(new SellerApproved([
-                        'company_name' => $seller->store_name,
-                    ], $signedUrl));
+                    // Try to send immediately (bypass queue) so email is delivered
+                    // even when queue worker is not running. If sendNow fails,
+                    // fallback to normal queued notification.
+                    try {
+                        Notification::sendNow($user, new SellerApproved([
+                            'company_name' => $seller->store_name,
+                        ], $signedUrl));
+                    } catch (\Throwable $e) {
+                        Log::warning('sendNow failed, falling back to queued notify: ' . $e->getMessage());
+                        $user->notify(new SellerApproved([
+                            'company_name' => $seller->store_name,
+                        ], $signedUrl));
+                    }
                 }
             } catch (\Exception $e) {
                 Log::error('Failed to send seller approved notification: ' . $e->getMessage());
