@@ -221,7 +221,17 @@
             
             <!-- Review Snippet -->
             <div class="review-snippet">
-                <div class="stars">★★★★★</div>
+                <div class="stars">
+                    @php
+                        $r = isset($rating) && is_numeric($rating) ? (int) max(0, min(5, $rating)) : 0;
+                        $filled = str_repeat('★', $r);
+                        $empty = str_repeat('☆', 5 - $r);
+                    @endphp
+                    {!! $filled . $empty !!}
+                    @if($r > 0)
+                        <span style="font-size:12px; color:#525560; margin-left:8px;">{{ $r }}/5</span>
+                    @endif
+                </div>
                 <div class="review-text">"{{ $reviewText }}"</div>
             </div>
             

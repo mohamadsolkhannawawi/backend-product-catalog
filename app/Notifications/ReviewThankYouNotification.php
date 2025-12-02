@@ -46,6 +46,7 @@ class ReviewThankYouNotification extends Notification implements ShouldQueue
                 'reviewerName' => $this->reviewerName,
                 'productName' => $this->reviewSnapshot['product_name'] ?? 'Produk',
                 'reviewText' => $this->reviewSnapshot['comment'] ?? 'Ulasan Anda',
+                'rating' => isset($this->reviewSnapshot['rating']) ? (int) $this->reviewSnapshot['rating'] : null,
                 'reviewUrl' => $frontendUrl . '/products/' . ($this->reviewSnapshot['product_slug'] ?? $this->reviewSnapshot['product_id'] ?? '#'),
                 'shopUrl' => $frontendUrl . '/catalog',
                 'helpUrl' => url('/help'),
