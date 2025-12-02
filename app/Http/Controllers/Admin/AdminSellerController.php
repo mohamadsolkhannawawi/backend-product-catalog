@@ -67,6 +67,9 @@ class AdminSellerController extends Controller
             try {
                 $user = $seller->user;
                 if ($user) {
+                    $userKey = method_exists($user, 'getKey') ? $user->getKey() : ($user->id ?? 'unknown');
+                    Log::info('Attempting to notify approved seller', ['user_key' => $userKey, 'signedUrl' => $signedUrl]);
+
                     // Try to send immediately (bypass queue) so email is delivered
                     // even when queue worker is not running. If sendNow fails,
                     // fallback to normal queued notification.
@@ -74,11 +77,17 @@ class AdminSellerController extends Controller
                         Notification::sendNow($user, new SellerApproved([
                             'company_name' => $seller->store_name,
                         ], $signedUrl));
+                        Log::info('sendNow succeeded for seller notification', ['user_key' => $userKey]);
                     } catch (\Throwable $e) {
-                        Log::warning('sendNow failed, falling back to queued notify: ' . $e->getMessage());
-                        $user->notify(new SellerApproved([
-                            'company_name' => $seller->store_name,
-                        ], $signedUrl));
+                        Log::warning('sendNow failed, falling back to queued notify: ' . $e->getMessage(), ['user_key' => $userKey]);
+                        try {
+                            $user->notify(new SellerApproved([
+                                'company_name' => $seller->store_name,
+                            ], $signedUrl));
+                            Log::info('Queued notify() called for seller notification', ['user_key' => $userKey]);
+                        } catch (\Throwable $e2) {
+                            Log::error('notify() failed for seller approved notification: ' . $e2->getMessage(), ['user_key' => $userKey]);
+                        }
                     }
                 }
             } catch (\Exception $e) {
