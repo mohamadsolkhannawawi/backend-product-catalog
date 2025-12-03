@@ -12,6 +12,5 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         // Ensure minimal Indonesia location data exists for validation rules
-        $this->seed(IndonesiaMinimalSeeder::class);
     }
 }
