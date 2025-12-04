@@ -11,11 +11,21 @@ class Category extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     
-    protected $fillable = ['name', 'slug', 'description'];
+    protected $fillable = ['name', 'slug', 'description', 'icon', 'parent_id'];
     
     public function products()
     {
         return $this->hasMany(Product::class, 'category_id', 'category_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(self::class, 'parent_id', 'category_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(self::class, 'parent_id', 'category_id');
     }
     
     protected static function booted()

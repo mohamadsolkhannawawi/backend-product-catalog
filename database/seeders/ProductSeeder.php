@@ -144,51 +144,102 @@ class ProductSeeder extends Seeder
 
     public function run(): void
     {
-        $sellers = Seller::where('status', 'approved')->get();
-        $categories = Category::all();
+        // Load approved/active sellers
+        $sellers = Seller::where('status', 'approved')->orWhere('is_active', true)->get();
 
-        if ($sellers->isEmpty() || $categories->isEmpty()) {
-            $this->command->warn('Pastikan CategorySeeder dan SellerSeeder sudah dijalankan terlebih dahulu!');
+        if ($sellers->isEmpty()) {
+            $this->command->warn('Pastikan SellerSeeder sudah dijalankan dan ada seller aktif/approved!');
             return;
         }
 
-        // Generate 25 produk (lebih dari 20)
-        $productCount = 0;
-        foreach ($sellers as $seller) {
-            // Setiap seller membuat 1-2 produk
-            $numProducts = rand(1, 2);
-            
-            for ($i = 0; $i < $numProducts; $i++) {
-                if ($productCount >= 25) break;
+        // Definitive product list (30 items) provided by user
+        $products = [
+            ['name' => 'Kaos Polos Cotton Combed 30s Oversize Lilac', 'category' => 'Fashion & Aksesoris', 'price' => 75000, 'stock' => 150, 'description' => 'Kaos polos gaya Korea bahan adem, cocok untuk outfit harian GenZ.'],
+            ['name' => 'Totebag Kanvas Motif Abstrak Handpainted', 'category' => 'Fashion & Aksesoris', 'price' => 45000, 'stock' => 50, 'description' => 'Tas bahu bahan kanvas tebal dengan lukisan tangan unik.'],
+            ['name' => 'Jaket Denim Sandwash Vintage', 'category' => 'Fashion & Aksesoris', 'price' => 185000, 'stock' => 30, 'description' => 'Jaket jeans model vintage yang trendy dan tahan lama.'],
 
-                $category = $categories->random();
-                $productName = $this->productNames[$productCount % count($this->productNames)];
-                $sampleImage = $this->sampleImages[$productCount % count($this->sampleImages)];
-                
-                Product::create([
-                    'seller_id' => $seller->seller_id,
-                    'name' => $productName,
-                    'slug' => Str::slug($productName) . '-' . $productCount,
-                    'description' => $this->descriptions[array_rand($this->descriptions)],
-                    'category_id' => $category->category_id,
-                    'price' => $this->generatePrice(),
-                    'stock' => rand(5, 100),
-                    'images' => json_encode([$sampleImage]),
-                    'primary_image' => $sampleImage,
-                    'visitor' => rand(10, 500),
-                    'is_active' => rand(0, 1) ? true : false,
-                ]);
+            ['name' => 'Kemeja Batik Pria Lengan Panjang Motif Mega Mendung', 'category' => 'Batik & Wastra Nusantara', 'price' => 125000, 'stock' => 60, 'description' => 'Batik printing motif Cirebon, bahan katun prima halus.'],
+            ['name' => 'Kain Tenun Ikat Troso Jepara Premium', 'category' => 'Batik & Wastra Nusantara', 'price' => 250000, 'stock' => 20, 'description' => 'Kain tenun asli ATBM (Alat Tenun Bukan Mesin) ukuran 240x120cm.'],
 
-                $productCount++;
-            }
+            ['name' => 'Baso Aci Instan Garut Paket Komplit', 'category' => 'Makanan & Minuman', 'price' => 15000, 'stock' => 500, 'description' => 'Jajanan viral isi baso aci, cuanki lidah, dan pilus cikur pedas.'],
+            ['name' => 'Kopi Arabika Gayo Aceh 250g - Biji Sangrai', 'category' => 'Makanan & Minuman', 'price' => 85000, 'stock' => 100, 'description' => 'Biji kopi pilihan dari dataran tinggi Gayo, aroma kuat dan nikmat.'],
+            ['name' => 'Keripik Pisang Coklat Lumer Lampung', 'category' => 'Makanan & Minuman', 'price' => 25000, 'stock' => 200, 'description' => 'Oleh-oleh khas Lampung, keripik renyah dengan balutan coklat tebal.'],
 
-            if ($productCount >= 25) break;
+            ['name' => 'Tas Anyaman Rotan Bulat Bali', 'category' => 'Kerajinan & Seni (Kriya)', 'price' => 120000, 'stock' => 40, 'description' => 'Tas selempang etnik buatan pengrajin Bali, cocok untuk OOTD.'],
+            ['name' => 'Hiasan Dinding Ukiran Kayu Jati Jepara', 'category' => 'Kerajinan & Seni (Kriya)', 'price' => 350000, 'stock' => 10, 'description' => 'Ukiran relief detail bahan kayu jati tua asli.'],
+
+            ['name' => 'Speaker Bluetooth Portable Bass Boost Waterproof', 'category' => 'Elektronik & Gadget', 'price' => 199000, 'stock' => 80, 'description' => 'Speaker mini suara mantap, tahan percikan air, baterai awet 8 jam.'],
+            ['name' => 'Tripod HP & Kamera Flexible Gorilla Pod', 'category' => 'Elektronik & Gadget', 'price' => 35000, 'stock' => 120, 'description' => 'Tripod gurita fleksibel bisa ditaruh di mana saja untuk ngonten.'],
+
+            ['name' => 'Mouse Wireless Silent Click Rechargeable', 'category' => 'Komputer & Laptop', 'price' => 79000, 'stock' => 90, 'description' => 'Mouse tanpa kabel, klik tidak berisik, baterai bisa diisi ulang.'],
+            ['name' => 'Cooling Pad Laptop 15.6 Inch RGB Fan', 'category' => 'Komputer & Laptop', 'price' => 110000, 'stock' => 45, 'description' => 'Kipas pendingin laptop gaming dengan lampu RGB keren.'],
+
+            ['name' => 'Rak Bunga Susun Besi Minimalis', 'category' => 'Perlengkapan Rumah & Dekorasi', 'price' => 145000, 'stock' => 25, 'description' => 'Rak pot tanaman bahan besi kokoh anti karat, muat 5 pot.'],
+            ['name' => 'Sprei Katun Lokal Motif Bunga Estetik', 'category' => 'Perlengkapan Rumah & Dekorasi', 'price' => 95000, 'stock' => 60, 'description' => 'Sprei ukuran Queen no.2, bahan adem tidak luntur.'],
+
+            ['name' => 'Serum Wajah Niacinamide Pencerah Kulit', 'category' => 'Kecantikan & Perawatan Diri', 'price' => 65000, 'stock' => 100, 'description' => 'Serum lokal viral ampuh mencerahkan dan menghilangkan noda hitam.'],
+            ['name' => 'Lip Tint Tahan Lama Water Based Lokal', 'category' => 'Kecantikan & Perawatan Diri', 'price' => 35000, 'stock' => 200, 'description' => 'Pewarna bibir tekstur air, ringan dan stain tahan lama seharian.'],
+
+            ['name' => 'Masker Medis 3 Ply Earloop Isi 50', 'category' => 'Kesehatan & Medis', 'price' => 20000, 'stock' => 500, 'description' => 'Masker kesehatan standar kemenkes, nyaman dipakai sehari-hari.'],
+            ['name' => 'Madu Murni Hutan Baduy 500ml', 'category' => 'Kesehatan & Medis', 'price' => 90000, 'stock' => 70, 'description' => 'Madu odeng asli dari hutan Baduy, menjaga imun tubuh.'],
+
+            ['name' => 'Gendongan Bayi Depan Hipseat Ergonomis', 'category' => 'Ibu, Bayi & Anak', 'price' => 165000, 'stock' => 30, 'description' => 'Gendongan modern aman untuk tulang bayi dan nyaman untuk ibu.'],
+            ['name' => 'Setelan Baju Tidur Anak Motif Dino', 'category' => 'Ibu, Bayi & Anak', 'price' => 45000, 'stock' => 80, 'description' => 'Piyama anak bahan kaos katun, menyerap keringat.'],
+
+            ['name' => 'Matras Yoga Anti Slip Ketebalan 10mm', 'category' => 'Hobi & Olahraga', 'price' => 85000, 'stock' => 50, 'description' => 'Alas olahraga empuk, tidak licin, gratis tas jaring.'],
+            ['name' => 'Jersey Sepeda Dry Fit Printing Custom', 'category' => 'Hobi & Olahraga', 'price' => 110000, 'stock' => 40, 'description' => 'Baju gowes bahan cepat kering, desain printing tajam.'],
+
+            ['name' => 'Helm Bogo Retro Kaca Datar SNI', 'category' => 'Otomotif & Aksesoris', 'price' => 180000, 'stock' => 60, 'description' => 'Helm klasik kekinian standar SNI, busa bisa dilepas cuci.'],
+            ['name' => 'Sarung Tangan Motor Touchscreen Anti Slip', 'category' => 'Otomotif & Aksesoris', 'price' => 35000, 'stock' => 100, 'description' => 'Sarung tangan riding bisa main HP tanpa dilepas.'],
+
+            ['name' => "Novel Fiksi Metropop 'Senja di Jakarta'", 'category' => 'Buku & Alat Tulis', 'price' => 79000, 'stock' => 45, 'description' => 'Buku best seller tentang kehidupan romansa di ibu kota.'],
+            ['name' => 'Paket Alat Tulis Sekolah Lengkap', 'category' => 'Buku & Alat Tulis', 'price' => 25000, 'stock' => 150, 'description' => 'Isi kotak pensil, pulpen, penghapus, penggaris, dan rautan.'],
+
+            ['name' => 'Mukena Bali Rayon Adem Motif Bunga', 'category' => 'Perlengkapan Muslim', 'price' => 115000, 'stock' => 75, 'description' => 'Mukena jumbo bahan rayon premium, dingin dipakai ibadah.'],
+            ['name' => 'Sarung Tenun Wadimor Motif Hujan Gerimis', 'category' => 'Perlengkapan Muslim', 'price' => 65000, 'stock' => 200, 'description' => 'Sarung tenun asli nyaman dipakai, motif elegan.'],
+        ];
+
+        $imagePaths = [
+            'products/sample1.png',
+            'products/sample2.png',
+            'products/sample3.png',
+        ];
+
+        $created = 0;
+        $sellerIndex = 0;
+        foreach ($products as $idx => $p) {
+            // assign seller in round-robin
+            $seller = $sellers[$sellerIndex % $sellers->count()];
+
+            // ensure category exists
+            $category = Category::firstOrCreate(
+                ['name' => $p['category']],
+                ['slug' => Str::slug($p['category']), 'description' => $p['category']]
+            );
+
+            Product::create([
+                'seller_id' => $seller->seller_id,
+                'name' => $p['name'],
+                'slug' => Str::slug($p['name']) . '-' . ($idx + 1),
+                'description' => $p['description'],
+                'category_id' => $category->category_id,
+                'price' => $p['price'],
+                'stock' => $p['stock'],
+                // store as array so Eloquent cast('images' => 'array') will handle JSON encoding
+                'images' => $imagePaths,
+                'primary_image' => $imagePaths[0],
+                'visitor' => rand(5, 200),
+                'is_active' => true,
+            ]);
+
+            $created++;
+            $sellerIndex++;
         }
 
-        // Update sellers dengan valid location codes
+        // Update sellers with valid location codes (keep existing helper)
         $this->updateSellersWithValidLocations();
 
-        $this->command->info('ProductSeeder selesai! Total produk: ' . $productCount);
+        $this->command->info('ProductSeeder selesai! Total produk: ' . $created);
     }
 
     /**
@@ -196,23 +247,32 @@ class ProductSeeder extends Seeder
      */
     private function updateSellersWithValidLocations(): void
     {
-        $locationIndex = 0;
-        $locations = array_values($this->validLocations);
-        
-        Seller::all()->each(function ($seller) use (&$locationIndex, $locations) {
-            $location = $locations[$locationIndex % count($locations)];
-            [$provinceCode, $cityCode, $districtCode, $villageCode] = [
-                array_key_first($this->validLocations),
-                $location[0],
-                $location[1],
-                $location[2][0],
+        // Prepare an indexed list preserving province codes
+        $locations = [];
+        foreach ($this->validLocations as $prov => $loc) {
+            $locations[] = [
+                'province' => $prov,
+                'city' => $loc[0] ?? null,
+                'district' => $loc[1] ?? null,
+                'village' => $loc[2][0] ?? null,
             ];
+        }
+
+        if (empty($locations)) {
+            return;
+        }
+
+        $locationIndex = 0;
+
+        // Only update sellers that don't yet have valid province_id (avoid repeated updates)
+        Seller::whereNull('province_id')->orWhere('province_id', '')->get()->each(function ($seller) use (&$locationIndex, $locations) {
+            $loc = $locations[$locationIndex % count($locations)];
 
             $seller->update([
-                'province_id' => $provinceCode,
-                'city_id' => $cityCode,
-                'district_id' => $districtCode,
-                'village_id' => $villageCode,
+                'province_id' => $loc['province'],
+                'city_id' => $loc['city'],
+                'district_id' => $loc['district'],
+                'village_id' => $loc['village'],
             ]);
 
             $locationIndex++;

@@ -17,13 +17,15 @@ class ProductPublicController extends Controller
     {
         $version = Cache::get('products_cache_version', 1);
 
-        $cacheKey = "products:index:v{$version}:page:{$request->get('page',1)}";
+        // Use full URL hash so different filters produce different cache entries
+        $paramsHash = md5(strtolower($request->fullUrl()));
+        $cacheKey = "products:index:v{$version}:{$paramsHash}:page:{$request->get('page',1)}";
 
         $products = Cache::remember($cacheKey, 60, function () use ($request) {
             $idColumn = Schema::hasColumn('products', 'product_id') ? 'product_id' : 'id';
             $selectId = $idColumn === 'product_id' ? 'product_id' : DB::raw('id as product_id');
 
-            return Product::with('seller.city', 'seller.province', 'category')
+            $query = Product::with('seller.city', 'seller.province', 'category')
                 ->withAvg('reviews', 'rating')
                 ->select(
                     $selectId,
@@ -38,9 +40,19 @@ class ProductPublicController extends Controller
                     'seller_id',
                     'created_at'
                 )
-                ->where('is_active', true)
-                ->orderBy($idColumn, 'desc')
-                ->paginate(20);
+                ->where('is_active', true);
+
+            // Allow filtering by category slug for icon-based filtering from frontend
+            if ($request->filled('category_slug')) {
+                $cat = \App\Models\Category::where('slug', $request->category_slug)->first();
+                if ($cat) {
+                    $query->where('category_id', $cat->category_id);
+                }
+            } elseif ($request->filled('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            return $query->orderBy($idColumn, 'desc')->paginate(20);
         });
 
         // Normalize average rating into `average_rating` float and add seller location
@@ -105,8 +117,13 @@ class ProductPublicController extends Controller
             $query->where('is_active', true);
         }
 
-        // Filter by category_id
-        if ($request->filled('category_id')) {
+        // Allow filtering by category slug (frontend icon click) or by id
+        if ($request->filled('category_slug')) {
+            $cat = \App\Models\Category::where('slug', $request->category_slug)->first();
+            if ($cat) {
+                $query->where('category_id', $cat->category_id);
+            }
+        } elseif ($request->filled('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 

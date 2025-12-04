@@ -94,6 +94,71 @@ class SellerSeeder extends Seeder
 
     public function run(): void
     {
+        // Create 3 specific active sellers as requested
+        $activeSellers = [
+            [
+                'name' => 'Andi Wijaya',
+                'email' => 'andi.batik@example.com',
+                'password' => bcrypt('password'),
+                'role' => 'seller',
+                'store_name' => 'Batik Pesona Jawa',
+                'status' => 'approved',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Sri Wahyuni',
+                'email' => 'sri.dapur@example.com',
+                'password' => bcrypt('password'),
+                'role' => 'seller',
+                'store_name' => 'Dapur Bu Sri',
+                'status' => 'approved',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Hendra Gunawan',
+                'email' => 'hendra.tekno@example.com',
+                'password' => bcrypt('password'),
+                'role' => 'seller',
+                'store_name' => 'Glodok Elektronik Semarang',
+                'status' => 'approved',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($activeSellers as $sdata) {
+            $user = User::firstOrCreate(
+                ['email' => $sdata['email']],
+                [
+                    'name' => $sdata['name'],
+                    'phone' => '08' . rand(10, 99) . rand(10000000, 99999999),
+                    'password' => $sdata['password'],
+                    'role' => 'seller',
+                ]
+            );
+
+            Seller::updateOrCreate(
+                ['user_id' => $user->user_id],
+                [
+                    'store_name' => $sdata['store_name'],
+                    'store_description' => $this->storeDescriptions[array_rand($this->storeDescriptions)],
+                    'phone' => $user->phone,
+                    'pic_name' => $this->picNames[array_rand($this->picNames)],
+                    'address' => 'Jl. ' . implode(' ', array_slice(explode(' ', fake()->address()), 0, 3)),
+                    'rt' => str_pad(rand(1, 20), 3, '0', STR_PAD_LEFT),
+                    'rw' => str_pad(rand(1, 15), 3, '0', STR_PAD_LEFT),
+                    'province_id' => $this->validLocations[array_rand($this->validLocations)]['province'],
+                    'city_id' => $this->validLocations[array_rand($this->validLocations)]['city'],
+                    'district_id' => $this->validLocations[array_rand($this->validLocations)]['district'],
+                    'village_id' => $this->validLocations[array_rand($this->validLocations)]['village'],
+                    'ktp_number' => $this->generateKTPNumber(),
+                    'status' => $sdata['status'],
+                    'verified_at' => now(),
+                    'is_active' => $sdata['is_active'],
+                ]
+            );
+        }
+
+        // continue creating additional generic sellers as before
         for ($i = 0; $i < 20; $i++) {
             // Create user with seller role
             $user = User::create([

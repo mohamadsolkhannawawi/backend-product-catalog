@@ -89,8 +89,8 @@ class ReviewSeeder extends Seeder
         $reviewCount = 0;
 
         foreach ($products as $product) {
-            // Setiap produk mendapat 1-2 review dengan email unik
-            $numReviews = rand(1, 2);
+            // Setiap produk mendapat 2 review seperti permintaan
+            $numReviews = 2;
 
             for ($i = 0; $i < $numReviews; $i++) {
                 $rating = rand(1, 5);
