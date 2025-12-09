@@ -172,6 +172,7 @@ class AdminSellerController extends Controller
     }
 
     /**
+    /**
      * Public signed verification endpoint. When clicked from email, finalize verification.
      */
     public function verify(Request $request)
@@ -187,8 +188,8 @@ class AdminSellerController extends Controller
         }
 
         $seller->verified_at = now();
-        $seller->is_active = true;
-        $seller->status = 'active';
+        $seller->is_active = true;  // ✅ Set is_active to true, not status
+        // status remains 'approved' - don't change it
         $seller->save();
 
         // Redirect to frontend verification success page (use frontend_url, not app.url)

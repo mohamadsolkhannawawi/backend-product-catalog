@@ -123,6 +123,7 @@ class AuthController extends Controller
             'pic_file_path'    => $picPath,
 
             'status'           => 'pending',
+            'is_active'        => false,  // Not active until they click email activation
             ]);
 
             // Generate Sanctum Bearer Token for immediate login after registration
@@ -233,6 +234,7 @@ class AuthController extends Controller
                 'pic_file_path'    => $picPath,
 
                 'status'           => 'pending',
+                'is_active'        => false,  // Not active until they click email activation
             ]);
 
             return response()->json([
@@ -259,14 +261,22 @@ class AuthController extends Controller
         }
 
         // After successful authentication, enforce seller approval policy:
-        // If the user is a seller and their seller record is not active, deny login.
+        // If the user is a seller, check both status (must be 'approved') and is_active (must be true).
+        // Only sellers who are both approved by admin AND have activated via email can login.
         $user = Auth::user();
         if ($user && $user->role === 'seller') {
             $seller = $user->seller;
-            if ($seller && $seller->status !== 'active') {
-                // Log out and deny access
+            if (!$seller) {
+                Auth::guard('web')->logout();
+                return response()->json(['message' => 'Seller profile not found'], 403);
+            }
+            if ($seller->status !== 'approved') {
                 Auth::guard('web')->logout();
                 return response()->json(['message' => 'Account pending approval by admin'], 403);
+            }
+            if (!$seller->is_active) {
+                Auth::guard('web')->logout();
+                return response()->json(['message' => 'Please activate your account via email'], 403);
             }
         }
 

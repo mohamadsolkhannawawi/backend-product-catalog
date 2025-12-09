@@ -143,6 +143,7 @@ class AuthTest extends TestCase
         Seller::factory()->create([
             'user_id' => $user->user_id,
             'status' => 'approved',
+            'is_active' => true,  // Explicitly set to active (clicked email activation)
         ]);
 
         $response = $this->postJson('/api/auth/login', [
@@ -152,6 +153,30 @@ class AuthTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJson(['message' => 'Logged in']);
+    }
+
+    /**
+     * Test that approved but not yet activated seller cannot login (must click email)
+     */
+    public function test_approved_seller_cannot_login_if_not_activated_via_email()
+    {
+        $user = User::factory()->create([
+            'role' => 'seller',
+            'password' => bcrypt('password123'),
+        ]);
+        Seller::factory()->create([
+            'user_id' => $user->user_id,
+            'status' => 'approved',
+            'is_active' => false,  // Not yet clicked email activation
+        ]);
+
+        $response = $this->postJson('/api/auth/login', [
+            'email' => $user->email,
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(403);
+        $response->assertJson(['message' => 'Please activate your account via email']);
     }
 
     /**
