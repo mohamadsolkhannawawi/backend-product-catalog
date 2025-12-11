@@ -21,12 +21,11 @@ class ProductPublicController extends Controller
         $paramsHash = md5(strtolower($request->fullUrl()));
         $cacheKey = "products:index:v{$version}:{$paramsHash}:page:{$request->get('page',1)}";
 
-        $products = Cache::remember($cacheKey, 60, function () use ($request) {
-            $idColumn = Schema::hasColumn('products', 'product_id') ? 'product_id' : 'id';
-            $selectId = $idColumn === 'product_id' ? 'product_id' : DB::raw('id as product_id');
+        $idColumn = Schema::hasColumn('products', 'product_id') ? 'product_id' : 'id';
+        $selectId = $idColumn === 'product_id' ? 'product_id' : DB::raw('id as product_id');
 
+        $products = Cache::remember($cacheKey, 60, function () use ($request, $idColumn, $selectId) {
             $query = Product::with('seller.city', 'seller.province', 'category')
-                ->withAvg('reviews', 'rating')
                 ->select(
                     $selectId,
                     'name',
@@ -55,9 +54,13 @@ class ProductPublicController extends Controller
             return $query->orderBy($idColumn, 'desc')->paginate(20);
         });
 
-        // Normalize average rating into `average_rating` float and add seller location
-        $products->getCollection()->transform(function ($p) {
-            $p->average_rating = $p->reviews_avg_rating ? round((float) $p->reviews_avg_rating, 2) : 0;
+        // Apply rating aggregation after cache (so it always recalculates)
+        $products->getCollection()->each(function ($p) {
+            // Manually calculate average rating for each product
+            $avgRating = DB::table('reviews')
+                ->where('product_id', $p->product_id)
+                ->avg('rating');
+            $p->average_rating = $avgRating ? round((float) $avgRating, 2) : 0;
             $p->city = $p->seller?->city?->name;
             $p->province = $p->seller?->province?->name;
             
@@ -71,8 +74,12 @@ class ProductPublicController extends Controller
     {
         $product = Product::where('slug', $slug)
             ->with(['seller.city', 'seller.province', 'reviews', 'category'])
-            ->withAvg('reviews', 'rating')
             ->firstOrFail();
+
+        // Calculate average rating fresh (not cached)
+        $avgRating = DB::table('reviews')
+            ->where('product_id', $product->product_id)
+            ->avg('rating');
 
         // only increment if the visitor column exists (defensive for mixed migration states)
         if (Schema::hasColumn('products', 'visitor')) {
@@ -94,7 +101,7 @@ class ProductPublicController extends Controller
             'stock'           => $product->stock,
             'primary_image'   => $product->primary_image,
             'images'          => $product->images,
-            'average_rating'  => $product->reviews_avg_rating ? round((float) $product->reviews_avg_rating, 2) : 0,
+            'average_rating'  => $avgRating ? round((float) $avgRating, 2) : 0,
             'seller'          => [
                 'seller_id'   => $product->seller->seller_id,
                 'store_name'  => $product->seller->store_name,
@@ -244,7 +251,11 @@ class ProductPublicController extends Controller
 
         // Normalize average rating into `average_rating` float and add seller location
         $products->getCollection()->transform(function ($p) {
-            $p->average_rating = $p->reviews_avg_rating ? round((float) $p->reviews_avg_rating, 2) : 0;
+            // Calculate average rating fresh (after cache)
+            $avgRating = DB::table('reviews')
+                ->where('product_id', $p->product_id)
+                ->avg('rating');
+            $p->average_rating = $avgRating ? round((float) $avgRating, 2) : 0;
             $p->city = $p->seller?->city?->name;
             $p->province = $p->seller?->province?->name;
             
