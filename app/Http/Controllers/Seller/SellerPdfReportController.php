@@ -218,27 +218,49 @@ class SellerPdfReportController extends Controller
 
     /**
      * Seller Reviews Report (PDF)
+     * Reviews are public (no user_id field), so fetch all reviews for seller's products
      */
     public function reviewsReport(Request $request)
     {
         try {
             $seller = Seller::where('user_id', $request->user()->user_id)->firstOrFail();
 
-            $data = Review::whereHas('product', function ($q) use ($seller) {
+            // Get all reviews for seller's products grouped with product info
+            $reviews = Review::whereHas('product', function ($q) use ($seller) {
                     $q->where('seller_id', $seller->seller_id);
                 })
-                ->with('product:product_id,name', 'reviewer:user_id,name')
+                ->with([
+                    'product:product_id,name,seller_id',
+                    'province:code,name'
+                ])
                 ->select(
                     'review_id',
                     'product_id',
-                    'user_id',
+                    'name',
+                    'email',
+                    'phone',
+                    'province_id',
                     'rating',
                     'comment',
                     'created_at'
                 )
-                ->orderBy('created_at', 'desc')
-                ->limit(50)
+                ->orderByDesc('created_at')
                 ->get();
+
+            // Transform to required format for template
+            $data = $reviews->map(function ($review) {
+                return [
+                    'review_id' => $review->review_id,
+                    'product_name' => $review->product->name,
+                    'reviewer_name' => $review->name,
+                    'reviewer_email' => $review->email,
+                    'reviewer_phone' => $review->phone,
+                    'province_name' => $review->province?->name ?? 'Unknown',
+                    'rating' => $review->rating,
+                    'comment' => $review->comment,
+                    'created_at' => $review->created_at,
+                ];
+            });
 
             $pdf = Pdf::loadView('pdf.seller-reviews-report', [
                 'data' => $data,
