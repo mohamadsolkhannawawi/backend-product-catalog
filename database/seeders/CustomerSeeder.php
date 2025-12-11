@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Seller;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class CustomerSeeder extends Seeder
 {
@@ -109,6 +111,9 @@ class CustomerSeeder extends Seeder
 
     public function run(): void
     {
+        // Copy sample files from frontend assets to backend storage
+        $this->copyFilesFromFrontend();
+
         foreach ($this->customers as $customerData) {
             // Create user with customer role
             $user = User::create([
@@ -134,8 +139,8 @@ class CustomerSeeder extends Seeder
                 'district_id' => $customerData['district_id'],
                 'village_id' => $customerData['village_id'],
                 'ktp_number' => $this->generateKTPNumber(),
-                'ktp_file_path' => 'ktp/samplektp.png',
-                'pic_file_path' => 'pic/samplepic.png',
+                'ktp_file_path' => 'documents/ktp/samplektp.png',
+                'pic_file_path' => 'images/pic/samplepic.png',
                 'status' => 'pending',
                 'verified_at' => null,
                 'is_active' => false,
@@ -146,5 +151,36 @@ class CustomerSeeder extends Seeder
     private function generateKTPNumber(): string
     {
         return rand(1000000000000000, 9999999999999999);
+    }
+
+    private function copyFilesFromFrontend(): void
+    {
+        // Paths
+        $frontendKtpSource = base_path('../frontend/src/assets/images/ktp/samplektp.png');
+        $frontendPicSource = base_path('../frontend/src/assets/images/pic/samplepic.png');
+        
+        $ktpDest = 'documents/ktp/samplektp.png';
+        $picDest = 'images/pic/samplepic.png';
+
+        // Ensure directories exist
+        $ktpDir = storage_path('app/private/documents/ktp');
+        $picDir = storage_path('app/public/images/pic');
+        
+        if (!File::isDirectory($ktpDir)) {
+            File::makeDirectory($ktpDir, 0755, true);
+        }
+        if (!File::isDirectory($picDir)) {
+            File::makeDirectory($picDir, 0755, true);
+        }
+
+        // Copy KTP file to private storage (only if not already copied)
+        if (File::exists($frontendKtpSource) && !Storage::disk('local')->exists($ktpDest)) {
+            Storage::disk('local')->put($ktpDest, File::get($frontendKtpSource));
+        }
+
+        // Copy PIC file to public storage (only if not already copied)
+        if (File::exists($frontendPicSource) && !Storage::disk('public')->exists($picDest)) {
+            Storage::disk('public')->put($picDest, File::get($frontendPicSource));
+        }
     }
 }
