@@ -69,14 +69,6 @@ Route::middleware(['auth:sanctum', 'role:seller', 'seller.active'])
 
 /*
 |--------------------------------------------------------------------------
-| SELLER REPORT
-|--------------------------------------------------------------------------
-*/
-Route::get('/dashboard/seller/reports/stock', [ReportController::class, 'sellerReport'])
-    ->middleware(['auth:sanctum', 'role:seller', 'seller.active']);
-
-/*
-|--------------------------------------------------------------------------
 | SELLER DASHBOARD
 |--------------------------------------------------------------------------
 */ 
@@ -89,14 +81,14 @@ Route::prefix('dashboard/seller')->middleware(['auth:sanctum', 'role:seller', 's
     Route::get('/charts/rating-per-product', [SellerDashboardController::class, 'ratingPerProduct']);
     Route::get('/charts/reviewers-by-province', [SellerDashboardController::class, 'reviewersByProvince']);
 
-    // Legacy JSON reports (for backward compatibility)
-    Route::get('/reports/stock', [ReportController::class, 'sellerStockReport']);
-    Route::get('/reports/top-rated', [ReportController::class, 'sellerTopRatedReport']);
-    Route::get('/reports/restock', [ReportController::class, 'sellerRestockReport']);
-    Route::get('/reports/sales', [ReportController::class, 'sellerSalesReport']);
-    Route::get('/reports/reviews', [ReportController::class, 'sellerReviewsReport']);
-
-    // Seller PDF report endpoints (SRS-MartPlace-12..14)
+    // Seller PDF report endpoints - using GET for frontend compatibility (SRS-MartPlace-12..14)
+    Route::get('/reports/stock', [SellerPdfReportController::class, 'stockReport']);
+    Route::get('/reports/top-rated', [SellerPdfReportController::class, 'topRatedReport']);
+    Route::get('/reports/restock', [SellerPdfReportController::class, 'restockReport']);
+    Route::get('/reports/sales', [SellerPdfReportController::class, 'salesReport']);
+    Route::get('/reports/reviews', [SellerPdfReportController::class, 'reviewsReport']);
+    
+    // Additional endpoints for PDF reports
     Route::post('/reports/download/stock', [SellerPdfReportController::class, 'stockReport']);
     Route::post('/reports/download/top-rated', [SellerPdfReportController::class, 'topRatedReport']);
     Route::post('/reports/download/restock', [SellerPdfReportController::class, 'restockReport']);

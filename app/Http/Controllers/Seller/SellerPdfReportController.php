@@ -40,7 +40,9 @@ class SellerPdfReportController extends Controller
                 'data' => $data,
                 'reportTitle' => 'LAPORAN DAFTAR PRODUK BERDASARKAN STOK',
                 'reportDate' => now()->format('d-m-Y'),
-            ])->setPaper('a4');
+            ])->setPaper('a4')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
 
             return $pdf->download('laporan-produk-stok-' . now()->format('Y-m-d') . '.pdf');
         } catch (\Exception $e) {
@@ -77,7 +79,9 @@ class SellerPdfReportController extends Controller
                 'data' => $data,
                 'reportTitle' => 'LAPORAN DAFTAR PRODUK BERDASARKAN RATING',
                 'reportDate' => now()->format('d-m-Y'),
-            ])->setPaper('a4');
+            ])->setPaper('a4')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
 
             return $pdf->download('laporan-produk-rating-' . now()->format('Y-m-d') . '.pdf');
         } catch (\Exception $e) {
@@ -113,7 +117,9 @@ class SellerPdfReportController extends Controller
                 'data' => $data,
                 'reportTitle' => 'LAPORAN DAFTAR PRODUK SEGERA DIPESAN',
                 'reportDate' => now()->format('d-m-Y'),
-            ])->setPaper('a4');
+            ])->setPaper('a4')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
 
             return $pdf->download('laporan-produk-restock-' . now()->format('Y-m-d') . '.pdf');
         } catch (\Exception $e) {
@@ -173,7 +179,9 @@ class SellerPdfReportController extends Controller
                 'data' => $data,
                 'reportTitle' => 'LAPORAN PENJUAL',
                 'reportDate' => now()->format('d-m-Y'),
-            ])->setPaper('a4');
+            ])->setPaper('a4')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
 
             return $pdf->stream('laporan-penjual-' . $reportType . '.pdf');
         } catch (\Exception $e) {
@@ -184,6 +192,8 @@ class SellerPdfReportController extends Controller
 
     /**
      * Seller Sales Report (PDF)
+     * Actually: Laporan Daftar Produk Segera Dipesan
+     * Products with stock < 2 ordered by category and name
      */
     public function salesReport(Request $request)
     {
@@ -191,6 +201,7 @@ class SellerPdfReportController extends Controller
             $seller = Seller::where('user_id', $request->user()->user_id)->firstOrFail();
 
             $data = Product::where('seller_id', $seller->seller_id)
+                ->where('stock', '<', 2)
                 ->with('category')
                 ->select(
                     'products.product_id',
@@ -199,15 +210,17 @@ class SellerPdfReportController extends Controller
                     'products.price',
                     'products.stock'
                 )
-                ->orderBy('products.created_at', 'desc')
-                ->limit(50)
+                ->orderBy('category_id', 'asc')
+                ->orderBy('name', 'asc')
                 ->get();
 
             $pdf = Pdf::loadView('pdf.seller-sales-report', [
                 'data' => $data,
-                'reportTitle' => 'LAPORAN PENJUALAN',
+                'reportTitle' => 'LAPORAN DAFTAR PRODUK SEGERA DIPESAN',
                 'reportDate' => now()->format('d-m-Y'),
-            ])->setPaper('a4');
+            ])->setPaper('a4')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
 
             return $pdf->download('laporan-penjualan-' . now()->format('Y-m-d') . '.pdf');
         } catch (\Exception $e) {
@@ -266,7 +279,9 @@ class SellerPdfReportController extends Controller
                 'data' => $data,
                 'reportTitle' => 'LAPORAN ULASAN DAN RATING',
                 'reportDate' => now()->format('d-m-Y'),
-            ])->setPaper('a4');
+            ])->setPaper('a4')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
 
             return $pdf->download('laporan-ulasan-' . now()->format('Y-m-d') . '.pdf');
         } catch (\Exception $e) {
