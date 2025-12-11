@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Http\Controllers\Controller;
 use App\Models\Seller;
 use App\Models\Product;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -178,6 +179,77 @@ class SellerPdfReportController extends Controller
         } catch (\Exception $e) {
             logger()->error('View seller report failed: ' . $e->getMessage());
             return response()->json(['error' => 'Gagal menampilkan laporan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Seller Sales Report (PDF)
+     */
+    public function salesReport(Request $request)
+    {
+        try {
+            $seller = Seller::where('user_id', $request->user()->user_id)->firstOrFail();
+
+            $data = Product::where('seller_id', $seller->seller_id)
+                ->with('category')
+                ->select(
+                    'products.product_id',
+                    'products.name',
+                    'products.category_id',
+                    'products.price',
+                    'products.stock'
+                )
+                ->orderBy('products.created_at', 'desc')
+                ->limit(50)
+                ->get();
+
+            $pdf = Pdf::loadView('pdf.seller-sales-report', [
+                'data' => $data,
+                'reportTitle' => 'LAPORAN PENJUALAN',
+                'reportDate' => now()->format('d-m-Y'),
+            ])->setPaper('a4');
+
+            return $pdf->download('laporan-penjualan-' . now()->format('Y-m-d') . '.pdf');
+        } catch (\Exception $e) {
+            logger()->error('Seller sales report failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Seller Reviews Report (PDF)
+     */
+    public function reviewsReport(Request $request)
+    {
+        try {
+            $seller = Seller::where('user_id', $request->user()->user_id)->firstOrFail();
+
+            $data = Review::whereHas('product', function ($q) use ($seller) {
+                    $q->where('seller_id', $seller->seller_id);
+                })
+                ->with('product:product_id,name', 'reviewer:user_id,name')
+                ->select(
+                    'review_id',
+                    'product_id',
+                    'user_id',
+                    'rating',
+                    'comment',
+                    'created_at'
+                )
+                ->orderBy('created_at', 'desc')
+                ->limit(50)
+                ->get();
+
+            $pdf = Pdf::loadView('pdf.seller-reviews-report', [
+                'data' => $data,
+                'reportTitle' => 'LAPORAN ULASAN DAN RATING',
+                'reportDate' => now()->format('d-m-Y'),
+            ])->setPaper('a4');
+
+            return $pdf->download('laporan-ulasan-' . now()->format('Y-m-d') . '.pdf');
+        } catch (\Exception $e) {
+            logger()->error('Seller reviews report failed: ' . $e->getMessage());
+            return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
         }
     }
 }
