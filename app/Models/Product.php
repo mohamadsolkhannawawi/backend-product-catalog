@@ -26,6 +26,7 @@ class Product extends Model
         'category_id',
         'price',
         'stock',
+        'status',
         'images',
         'visitor',
         'is_active',

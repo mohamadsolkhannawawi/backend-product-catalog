@@ -46,6 +46,7 @@ class ProductController extends Controller
             'category_id' => 'nullable|uuid|exists:categories,category_id',
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
+            'status'      => 'nullable|in:draft,active,inactive,discontinued',
 
             // Enforce at least 2 images per SRS (primary + secondary)
             'images'      => 'required|array|min:2',
@@ -75,6 +76,7 @@ class ProductController extends Controller
             'description' => $validated['description'] ?? null,
             'price'       => $validated['price'],
             'stock'       => $validated['stock'],
+            'status'      => $validated['status'] ?? 'draft',
             'category'    => $validated['category'] ?? null,
             'category_id' => $validated['category_id'] ?? null,
             'images'      => $imagePaths,
@@ -123,6 +125,7 @@ class ProductController extends Controller
             'category_id' => 'nullable|uuid|exists:categories,category_id',
             'price'       => 'nullable|numeric|min:0',
             'stock'       => 'nullable|integer|min:0',
+            'status'      => 'nullable|in:draft,active,inactive,discontinued',
             // If images are provided on update, enforce min 2 to satisfy SRS
             'images'      => 'nullable|array|min:2',
             'images.*'    => 'image|mimes:jpg,jpeg,png|max:2048',
@@ -137,6 +140,7 @@ class ProductController extends Controller
             'category_id' => $validated['category_id'] ?? null,
             'price'       => $validated['price'] ?? null,
             'stock'       => $validated['stock'] ?? null,
+            'status'      => $validated['status'] ?? null,
         ]));
 
         // Jika ada file baru maka hapus gambar lama & upload baru
