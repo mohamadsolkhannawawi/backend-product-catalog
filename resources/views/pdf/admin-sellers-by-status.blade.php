@@ -21,7 +21,7 @@
             <td>{{ $seller->user->name ?? '-' }}</td>
             <td>{{ $seller->pic_name ?? '-' }}</td>
             <td>{{ $seller->store_name ?? '-' }}</td>
-            <td>{{ ucfirst($seller->status ?? 'unknown') }}</td>
+            <td>{{ $seller->is_active ? 'Aktif' : 'Tidak Aktif' }}</td>
         </tr>
         @empty
         <tr>
