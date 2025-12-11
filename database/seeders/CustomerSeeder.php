@@ -3,87 +3,148 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Seller;
 use Illuminate\Database\Seeder;
 
 class CustomerSeeder extends Seeder
 {
     /**
-     * Nama-nama umum pelanggan Indonesia
+     * 10 customer dengan lokasi berbeda (Banten 36, Bali 51, Jawa Tengah 33)
      */
-    private array $firstNames = [
-        'Ahmad', 'Budi', 'Citra', 'Dewi', 'Eka', 'Fajar', 'Gita', 'Hendra',
-        'Indah', 'Joko', 'Karina', 'Lina', 'Mira', 'Nanda', 'Oka', 'Putri',
-        'Qianna', 'Rina', 'Siti', 'Toni', 'Udin', 'Vita', 'Wahyu', 'Xenia',
-        'Yudi', 'Zara', 'Anita', 'Bambang', 'Cahyono', 'Dani', 'Erika',
-        'Faisal', 'Galuh', 'Handoko', 'Irma', 'Jaka', 'Kusuma', 'Lusiana',
-        'Magdalena', 'Novi', 'Oscar', 'Puspita', 'Rama', 'Sinta', 'Tara',
-        'Umar', 'Vika', 'Wulandari', 'Yanuar', 'Zahra'
-    ];
-
-    private array $lastNames = [
-        'Wijaya', 'Santoso', 'Kurniawan', 'Hidayat', 'Rahman', 'Setiawan',
-        'Hartono', 'Winarno', 'Suryanto', 'Permata', 'Kusuma', 'Pratama',
-        'Hermawan', 'Gunawan', 'Handayani', 'Suharto', 'Prabowo', 'Yudhoyono',
-        'Soeharto', 'Soekarno', 'Haryanto', 'Supriyanto', 'Riyanto', 'Prihatno',
-        'Ardianto', 'Budiman', 'Cahyono', 'Darwanto', 'Eka', 'Farros', 'Gunawan',
-        'Hadi', 'Ismail', 'Jamaludin', 'Kemal', 'Lukas', 'Mahmud', 'Nurdin',
-        'Osman', 'Parman', 'Qanita', 'Ridho', 'Syaiful', 'Taufik', 'Ulfah'
-    ];
-
-    private array $provinces = [
-        '11', '12', '13', '14', '15', '16', '17', '18', '19', '21',
-        '31', '32', '33', '34', '35', '36', '51', '52', '53', '61',
-        '62', '63', '64', '65', '71', '72', '73', '74', '75', '76'
+    private array $customers = [
+        // Banten (36)
+        [
+            'name' => 'Ahmad Hidayat',
+            'email' => 'ahmad.hidayat@example.com',
+            'phone' => '081234567890',
+            'province_id' => '36',
+            'city_id' => '3601',
+            'district_id' => '360101',
+            'village_id' => '3601012001',
+        ],
+        [
+            'name' => 'Siti Nurhaliza',
+            'email' => 'siti.nurhaliza@example.com',
+            'phone' => '081234567891',
+            'province_id' => '36',
+            'city_id' => '3601',
+            'district_id' => '360101',
+            'village_id' => '3601012002',
+        ],
+        [
+            'name' => 'Budi Santoso',
+            'email' => 'budi.santoso@example.com',
+            'phone' => '081234567892',
+            'province_id' => '36',
+            'city_id' => '3602',
+            'district_id' => '360201',
+            'village_id' => '3602012001',
+        ],
+        // Bali (51)
+        [
+            'name' => 'Made Wijaya',
+            'email' => 'made.wijaya@example.com',
+            'phone' => '081234567893',
+            'province_id' => '51',
+            'city_id' => '5101',
+            'district_id' => '510101',
+            'village_id' => '5101012001',
+        ],
+        [
+            'name' => 'Ketut Santoso',
+            'email' => 'ketut.santoso@example.com',
+            'phone' => '081234567894',
+            'province_id' => '51',
+            'city_id' => '5101',
+            'district_id' => '510101',
+            'village_id' => '5101012002',
+        ],
+        [
+            'name' => 'Ni Wayan Kusuma',
+            'email' => 'ni.wayan.kusuma@example.com',
+            'phone' => '081234567895',
+            'province_id' => '51',
+            'city_id' => '5102',
+            'district_id' => '510201',
+            'village_id' => '5102012001',
+        ],
+        // Jawa Tengah (33)
+        [
+            'name' => 'Rini Pramesti',
+            'email' => 'rini.pramesti@example.com',
+            'phone' => '081234567896',
+            'province_id' => '33',
+            'city_id' => '3301',
+            'district_id' => '330101',
+            'village_id' => '3301012001',
+        ],
+        [
+            'name' => 'Hendra Gunawan',
+            'email' => 'hendra.gunawan@example.com',
+            'phone' => '081234567897',
+            'province_id' => '33',
+            'city_id' => '3302',
+            'district_id' => '330201',
+            'village_id' => '3302012001',
+        ],
+        [
+            'name' => 'Dwi Lestari',
+            'email' => 'dwi.lestari@example.com',
+            'phone' => '081234567898',
+            'province_id' => '33',
+            'city_id' => '3303',
+            'district_id' => '330301',
+            'village_id' => '3303012001',
+        ],
+        [
+            'name' => 'Yanuartomo',
+            'email' => 'yanuartomo@example.com',
+            'phone' => '081234567899',
+            'province_id' => '33',
+            'city_id' => '3304',
+            'district_id' => '330401',
+            'village_id' => '3304012001',
+        ],
     ];
 
     public function run(): void
     {
-        // Create 10 specific pending applicants (customers who registered as sellers)
-        $pendingApplicants = [
-            ['name' => 'Budi Santoso', 'email' => 'budi.santoso@example.com'],
-            ['name' => 'Siti Aminah', 'email' => 'siti.aminah@example.com'],
-            ['name' => 'Rizky Pratama', 'email' => 'rizky.pratama@example.com'],
-            ['name' => 'Dewi Sartika', 'email' => 'dewi.sartika@example.com'],
-            ['name' => 'Ahmad Fauzi', 'email' => 'ahmad.fauzi@example.com'],
-            ['name' => 'Ratna Wulandari', 'email' => 'ratna.wulan@example.com'],
-            ['name' => 'Eko Prasetyo', 'email' => 'eko.prasetyo@example.com'],
-            ['name' => 'Nurul Hidayah', 'email' => 'nurul.hidayah@example.com'],
-            ['name' => 'Dimas Anggara', 'email' => 'dimas.anggara@example.com'],
-            ['name' => 'Fitri Handayani', 'email' => 'fitri.handayani@example.com'],
-        ];
+        foreach ($this->customers as $customerData) {
+            // Create user with customer role
+            $user = User::create([
+                'name' => $customerData['name'],
+                'email' => $customerData['email'],
+                'phone' => $customerData['phone'],
+                'password' => bcrypt('Password123.'),
+                'role' => 'customer',
+            ]);
 
-        foreach ($pendingApplicants as $idx => $app) {
-            $user = User::firstOrCreate(
-                ['email' => $app['email']],
-                [
-                    'name' => $app['name'],
-                    'phone' => '08' . rand(10, 99) . rand(10000000, 99999999),
-                    'password' => bcrypt('password'),
-                    'role' => 'customer',
-                ]
-            );
-
-            // create seller application record in sellers table with pending status
-            \App\Models\Seller::firstOrCreate(
-                ['user_id' => $user->user_id],
-                [
-                    'store_name' => 'Applicant - ' . $user->name,
-                    'store_description' => 'Permohonan pendaftaran seller oleh ' . $user->name,
-                    'phone' => $user->phone,
-                    'pic_name' => $user->name, // required field (PIC name)
-                    'address' => null,
-                    'province_id' => null,
-                    'city_id' => null,
-                    'district_id' => null,
-                    'village_id' => null,
-                    'ktp_number' => null,
-                    'ktp_file_path' => null,
-                    'pic_file_path' => null,
-                    'status' => 'pending',
-                    'verified_at' => null,
-                    'is_active' => false,
-                ]
-            );
+            // Create seller application with pending status
+            Seller::create([
+                'user_id' => $user->user_id,
+                'store_name' => 'Applicant - ' . $user->name,
+                'store_description' => 'Permohonan pendaftaran seller oleh ' . $user->name,
+                'phone' => $user->phone,
+                'pic_name' => $user->name,
+                'address' => 'Jl. ' . ucfirst(str_repeat('Jalan', 1)) . ' ' . $customerData['name'],
+                'rt' => '001',
+                'rw' => '001',
+                'province_id' => $customerData['province_id'],
+                'city_id' => $customerData['city_id'],
+                'district_id' => $customerData['district_id'],
+                'village_id' => $customerData['village_id'],
+                'ktp_number' => $this->generateKTPNumber(),
+                'ktp_file_path' => 'ktp/samplektp.png',
+                'pic_file_path' => 'pic/samplepic.png',
+                'status' => 'pending',
+                'verified_at' => null,
+                'is_active' => false,
+            ]);
         }
+    }
+
+    private function generateKTPNumber(): string
+    {
+        return rand(1000000000000000, 9999999999999999);
     }
 }
