@@ -17,19 +17,15 @@
         </tr>
     </thead>
     <tbody>
-        @forelse($data ?? [] as $index => $product)
+        @forelse($data ?? [] as $index => $item)
         <tr>
             <td class="text-center">{{ $index + 1 }}</td>
-            <td>{{ $product->name ?? '-' }}</td>
-            <td>{{ $product->category->name ?? '-' }}</td>
-            <td class="text-right">Rp {{ number_format($product->price ?? 0, 0, ',', '.') }}</td>
-            <td class="text-center">{{ number_format($product->avg_rating ?? 0, 1) }}</td>
-            <td>{{ $product->seller->store_name ?? '-' }}</td>
-            @if($product->latest_review && $product->latest_review->province)
-                <td>{{ $product->latest_review->province->name }}</td>
-            @else
-                <td>-</td>
-            @endif
+            <td>{{ $item['product_name'] ?? '-' }}</td>
+            <td>{{ $item['category_name'] ?? '-' }}</td>
+            <td class="text-right">Rp {{ number_format($item['price'] ?? 0, 0, ',', '.') }}</td>
+            <td class="text-center">{{ number_format($item['avg_rating'] ?? 0, 2) }}</td>
+            <td>{{ $item['store_name'] ?? '-' }}</td>
+            <td>{{ $item['province_name'] ?? '-' }}</td>
         </tr>
         @empty
         <tr>

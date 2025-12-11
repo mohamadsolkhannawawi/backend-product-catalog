@@ -100,39 +100,46 @@ class ReportController extends Controller
     /**
      * (SRS-MartPlace-11) Admin Products by Rating Report (PDF)
      * Per-province breakdown: one row per (product, province) combination
+     * Each row shows: Product, Category, Price, Rating (avg for that product in that province), Store Name, Province
+     * Sorted by rating descending
      */
     public function platformTopRatedProductsReport(Request $request)
     {
         try {
-            // Get all reviews with product and seller info grouped by product-province
-            $data = Review::with([
+            // Get all reviews with product and seller info
+            // Group by (product_id, province_id) and calculate average rating per group
+            $reviews = Review::with([
+                'product:product_id,name,category_id,price,seller_id,is_active',
                 'product.category:category_id,name',
                 'product.seller:seller_id,store_name,province_id',
-                'product.seller.province:code,name',
                 'province:code,name'
             ])
                 ->where('reviews.rating', '>', 0)
-                ->select(
-                    'reviews.product_id',
-                    'reviews.province_id',
-                    'reviews.rating',
-                    DB::raw('ROW_NUMBER() OVER (PARTITION BY reviews.product_id, reviews.province_id ORDER BY reviews.created_at DESC) as rn')
-                )
-                ->get()
-                ->groupBy(['product_id', 'province_id'])
-                ->flatMap(function ($productGroup) {
-                    return $productGroup->map(function ($provinceReviews) {
-                        $firstReview = $provinceReviews->first();
-                        $avgRating = $provinceReviews->avg('rating');
-                        return [
-                            'product' => $firstReview->product,
-                            'province_name' => $firstReview->province?->name ?? 'Unknown',
-                            'avg_rating' => round($avgRating, 2),
-                            'review_count' => $provinceReviews->count(),
-                        ];
-                    });
-                })
+                ->get();
+
+            // Group by (product_id, province_id) and calculate average rating
+            $groupedData = $reviews->groupBy(function ($review) {
+                return $review->product_id . '-' . $review->province_id;
+            })->map(function ($group) {
+                $firstReview = $group->first();
+                $avgRating = $group->avg('rating');
+                
+                return [
+                    'product_id' => $firstReview->product_id,
+                    'product_name' => $firstReview->product->name,
+                    'category_name' => $firstReview->product->category->name ?? '-',
+                    'price' => $firstReview->product->price,
+                    'store_name' => $firstReview->product->seller->store_name ?? '-',
+                    'province_name' => $firstReview->province?->name ?? 'Unknown',
+                    'avg_rating' => round($avgRating, 2),
+                    'review_count' => $group->count(),
+                ];
+            });
+
+            // Sort by rating descending, then by product name
+            $data = $groupedData
                 ->sortByDesc('avg_rating')
+                ->sortBy('product_name')
                 ->values();
 
             $pdf = Pdf::loadView('pdf.admin-products-by-rating-formal', [
