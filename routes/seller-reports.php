@@ -15,6 +15,10 @@ Route::middleware(['auth:sanctum', 'seller'])->group(function () {
             ->name('seller.report.top-rated.download');
         Route::post('/restock/download', [SellerPdfReportController::class, 'restockReport'])
             ->name('seller.report.restock.download');
+        Route::post('/sales/download', [SellerPdfReportController::class, 'salesReport'])
+            ->name('seller.report.sales.download');
+        Route::post('/reviews/download', [SellerPdfReportController::class, 'reviewsReport'])
+            ->name('seller.report.reviews.download');
 
         // View reports in browser
         Route::get('/view', [SellerPdfReportController::class, 'viewReport'])
