@@ -238,46 +238,25 @@ class SellerPdfReportController extends Controller
         try {
             $seller = Seller::where('user_id', $request->user()->user_id)->firstOrFail();
 
-            // Get all reviews for seller's products grouped with product info
-            $reviews = Review::whereHas('product', function ($q) use ($seller) {
-                    $q->where('seller_id', $seller->seller_id);
-                })
-                ->with([
-                    'product:product_id,name,seller_id',
-                    'province:code,name'
-                ])
+            // Get all products with average rating, sorted by rating descending
+            $data = Product::where('seller_id', $seller->seller_id)
+                ->with('category')
                 ->select(
-                    'review_id',
-                    'product_id',
-                    'name',
-                    'email',
-                    'phone',
-                    'province_id',
-                    'rating',
-                    'comment',
-                    'created_at'
+                    'products.product_id',
+                    'products.name',
+                    'products.category_id',
+                    'products.price',
+                    'products.stock',
+                    DB::raw('COALESCE(AVG(reviews.rating), 0) as avg_rating')
                 )
-                ->orderByDesc('created_at')
+                ->leftJoin('reviews', 'reviews.product_id', '=', 'products.product_id')
+                ->groupBy('products.product_id', 'products.name', 'products.category_id', 'products.price', 'products.stock')
+                ->orderByDesc('avg_rating')
                 ->get();
-
-            // Transform to required format for template
-            $data = $reviews->map(function ($review) {
-                return [
-                    'review_id' => $review->review_id,
-                    'product_name' => $review->product->name,
-                    'reviewer_name' => $review->name,
-                    'reviewer_email' => $review->email,
-                    'reviewer_phone' => $review->phone,
-                    'province_name' => $review->province?->name ?? 'Unknown',
-                    'rating' => $review->rating,
-                    'comment' => $review->comment,
-                    'created_at' => $review->created_at,
-                ];
-            });
 
             $pdf = Pdf::loadView('pdf.seller-reviews-report', [
                 'data' => $data,
-                'reportTitle' => 'LAPORAN ULASAN DAN RATING',
+                'reportTitle' => 'LAPORAN DAFTAR PRODUK BERDASARKAN RATING',
                 'reportDate' => now()->format('d-m-Y'),
             ])->setPaper('a4')
             ->setOption('isHtml5ParserEnabled', true)
