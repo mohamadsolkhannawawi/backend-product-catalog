@@ -179,48 +179,66 @@ class ProductPublicController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
-        // Sorting
-        switch ($request->get('sort')) {
-            case 'price_asc':
-                $query->orderBy('price', 'asc');
-                break;
-
-            case 'price_desc':
-                $query->orderBy('price', 'desc');
-                break;
-
-            case 'rating_desc':
-                $query->withAvg('reviews', 'rating')
-                    ->orderByDesc('reviews_avg_rating');
-                break;
-
-            case 'newest':
-            default:
-            $query->orderBy('product_id', 'desc');
-                break;
-        }
-
         // Mengembalikan fields katalog publik yang sama dan paginasi seperti `index`
         $version = Cache::get('products_cache_version', 1);
         $paramsHash = md5(strtolower($request->fullUrl()));
         $cacheKey = "products:search:v{$version}:{$paramsHash}:page:{$request->get('page',1)}";
 
-        $products = Cache::remember($cacheKey, 60, function () use ($query) {
+        $products = Cache::remember($cacheKey, 60, function () use ($query, $request) {
+            // Add joins and aggregates BEFORE select and sorting
+            if ($request->get('sort') === 'rating_desc') {
+                // For rating sort, use leftJoin with GROUP BY to explicitly calculate avg_rating
+                $query->leftJoin('reviews', 'products.product_id', '=', 'reviews.product_id')
+                    ->select(
+                        'products.product_id',
+                        'products.name',
+                        'products.slug',
+                        'products.price',
+                        'products.stock',
+                        'products.category',
+                        'products.category_id',
+                        'products.images',
+                        'products.primary_image',
+                        'products.seller_id',
+                        'products.created_at',
+                        DB::raw('COALESCE(AVG(reviews.rating), 0) as reviews_avg_rating')
+                    )
+                    ->groupBy(
+                        'products.product_id'
+                    )
+                    ->orderByDesc('reviews_avg_rating');
+            } else {
+                // For other sorts, just select normally
+                $query->select(
+                    'products.product_id',
+                    'products.name',
+                    'products.slug',
+                    'products.price',
+                    'products.stock',
+                    'products.category',
+                    'products.category_id',
+                    'products.images',
+                    'products.primary_image',
+                    'products.seller_id',
+                    'products.created_at'
+                );
+
+                // Apply sorting for non-rating sorts
+                switch ($request->get('sort')) {
+                    case 'price_asc':
+                        $query->orderBy('price', 'asc');
+                        break;
+                    case 'price_desc':
+                        $query->orderBy('price', 'desc');
+                        break;
+                    case 'newest':
+                    default:
+                        $query->orderBy('products.product_id', 'desc');
+                        break;
+                }
+            }
+
             return $query->with('seller.city', 'seller.province', 'category')
-                ->withAvg('reviews', 'rating')
-                ->select(
-                    'product_id',
-                    'name',
-                    'slug',
-                    'price',
-                    'stock',
-                    'category',
-                    'category_id',
-                    'images',
-                    'primary_image',
-                    'seller_id',
-                    'created_at'
-                )
                 ->paginate(20);
         });
 
