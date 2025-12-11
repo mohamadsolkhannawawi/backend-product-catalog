@@ -93,11 +93,15 @@ Route::prefix('dashboard/seller')->middleware(['auth:sanctum', 'role:seller', 's
     Route::get('/reports/stock', [ReportController::class, 'sellerStockReport']);
     Route::get('/reports/top-rated', [ReportController::class, 'sellerTopRatedReport']);
     Route::get('/reports/restock', [ReportController::class, 'sellerRestockReport']);
+    Route::get('/reports/sales', [ReportController::class, 'sellerSalesReport']);
+    Route::get('/reports/reviews', [ReportController::class, 'sellerReviewsReport']);
 
     // Seller PDF report endpoints (SRS-MartPlace-12..14)
     Route::post('/reports/download/stock', [SellerPdfReportController::class, 'stockReport']);
     Route::post('/reports/download/top-rated', [SellerPdfReportController::class, 'topRatedReport']);
     Route::post('/reports/download/restock', [SellerPdfReportController::class, 'restockReport']);
+    Route::post('/reports/download/sales', [SellerPdfReportController::class, 'salesReport']);
+    Route::post('/reports/download/reviews', [SellerPdfReportController::class, 'reviewsReport']);
     Route::get('/reports/view', [SellerPdfReportController::class, 'viewReport']);
 });
 

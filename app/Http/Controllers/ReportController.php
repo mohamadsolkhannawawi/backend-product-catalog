@@ -293,4 +293,61 @@ class ReportController extends Controller
             return response()->json(['error' => 'Gagal membuat laporan: ' . $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Seller Sales Report (for JSON endpoint)
+     */
+    public function sellerSalesReport(Request $request)
+    {
+        $seller = Seller::where('user_id', $request->user()->user_id)->firstOrFail();
+        
+        $data = Product::where('seller_id', $seller->seller_id)
+            ->with('category')
+            ->select(
+                'products.product_id',
+                'products.name',
+                'products.category_id',
+                'products.price',
+                'products.stock'
+            )
+            ->orderBy('products.created_at', 'desc')
+            ->limit(50)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'message' => 'Sales report data',
+        ]);
+    }
+
+    /**
+     * Seller Reviews Report (for JSON endpoint)
+     */
+    public function sellerReviewsReport(Request $request)
+    {
+        $seller = Seller::where('user_id', $request->user()->user_id)->firstOrFail();
+        
+        $data = Review::whereHas('product', function ($q) use ($seller) {
+                $q->where('seller_id', $seller->seller_id);
+            })
+            ->with('product:product_id,name', 'reviewer:user_id,name')
+            ->select(
+                'review_id',
+                'product_id',
+                'user_id',
+                'rating',
+                'comment',
+                'created_at'
+            )
+            ->orderBy('created_at', 'desc')
+            ->limit(50)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'message' => 'Reviews report data',
+        ]);
+    }
 }
