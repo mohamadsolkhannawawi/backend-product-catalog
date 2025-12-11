@@ -41,14 +41,15 @@ class ReportController extends Controller
 
     /**
      * (SRS-MartPlace-09) Admin Sellers Report by Status (PDF)
+     * Status = Aktif (is_active=true) atau Tidak Aktif (is_active=false)
      */
     public function platformSellersReport(Request $request)
     {
         try {
             $data = Seller::with('user:user_id,name')
-                ->select('seller_id', 'user_id', 'store_name', 'status', 'phone', 'pic_name')
-                ->where('is_active', true)
-                ->orderByRaw("CASE WHEN status = 'approved' THEN 0 ELSE 1 END")
+                ->select('seller_id', 'user_id', 'store_name', 'is_active', 'phone', 'pic_name')
+                ->where('status', 'approved') // Only approved sellers
+                ->orderByRaw("CASE WHEN is_active = true THEN 0 ELSE 1 END") // Aktif dulu baru Tidak Aktif
                 ->orderBy('store_name')
                 ->get();
 
@@ -98,31 +99,38 @@ class ReportController extends Controller
 
     /**
      * (SRS-MartPlace-11) Admin Products by Rating Report (PDF)
+     * Per-province breakdown: one row per (product, province) combination
      */
     public function platformTopRatedProductsReport(Request $request)
     {
         try {
-            // Get products with reviews, calculating average rating
-            $data = Product::with([
-                'category:category_id,name',
-                'seller:seller_id,store_name',
-                'reviews' => function ($query) {
-                    $query->with('province:code,name')
-                        ->orderByDesc('created_at');
-                }
+            // Get all reviews with product and seller info grouped by product-province
+            $data = Review::with([
+                'product.category:category_id,name',
+                'product.seller:seller_id,store_name,province_id',
+                'product.seller.province:code,name',
+                'province:code,name'
             ])
-                ->where('products.is_active', true)
+                ->where('reviews.rating', '>', 0)
+                ->select(
+                    'reviews.product_id',
+                    'reviews.province_id',
+                    'reviews.rating',
+                    DB::raw('ROW_NUMBER() OVER (PARTITION BY reviews.product_id, reviews.province_id ORDER BY reviews.created_at DESC) as rn')
+                )
                 ->get()
-                ->filter(function ($product) {
-                    // Only include products with reviews
-                    return $product->reviews->count() > 0;
-                })
-                ->map(function ($product) {
-                    // Calculate average rating and add it
-                    $product->avg_rating = $product->reviews->avg('rating');
-                    // Get latest review with province
-                    $product->latest_review = $product->reviews->first();
-                    return $product;
+                ->groupBy(['product_id', 'province_id'])
+                ->flatMap(function ($productGroup) {
+                    return $productGroup->map(function ($provinceReviews) {
+                        $firstReview = $provinceReviews->first();
+                        $avgRating = $provinceReviews->avg('rating');
+                        return [
+                            'product' => $firstReview->product,
+                            'province_name' => $firstReview->province?->name ?? 'Unknown',
+                            'avg_rating' => round($avgRating, 2),
+                            'review_count' => $provinceReviews->count(),
+                        ];
+                    });
                 })
                 ->sortByDesc('avg_rating')
                 ->values();
