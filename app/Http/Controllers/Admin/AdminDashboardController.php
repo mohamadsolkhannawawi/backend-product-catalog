@@ -98,24 +98,18 @@ class AdminDashboardController extends Controller
      */
     public function sellersByProvince()
     {
-        $tablePrefix = config('laravolt.indonesia.table_prefix', 'indonesia_');
-        $provincesTable = $tablePrefix . 'provinces';
-        
         $data = Seller::select('province_id')
             ->selectRaw('count(*) as count')
             ->where('status', 'approved')
+            ->where('province_id', '!=', null)
             ->groupBy('province_id')
             ->orderByRaw('count DESC')
+            ->with('province:code,name')
             ->get()
-            ->map(function ($item) use ($provincesTable) {
-                // Get province name from laravolt/indonesia package
-                $province = DB::table($provincesTable)
-                    ->where('id', $item->province_id)
-                    ->value('name');
-                
+            ->map(function ($item) {
                 return [
                     'province_id' => $item->province_id,
-                    'province_name' => $province ?: 'Unknown',
+                    'province_name' => $item->province?->name ?? 'Unknown',
                     'count' => $item->count,
                 ];
             });
