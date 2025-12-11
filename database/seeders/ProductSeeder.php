@@ -13,6 +13,7 @@ class ProductSeeder extends Seeder
     /**
      * 12 produk untuk 3 seller (4 produk per seller)
      * Diambil dari nama file gambar yang sudah disediakan
+     * Setiap produk memiliki multiple images (primary_image + images array)
      */
     private array $productsData = [
         // Seller 1 - Mohamad Solkhan Nawawi (4 produk)
@@ -23,7 +24,11 @@ class ProductSeeder extends Seeder
             'stock' => 15,
             'category_slug' => 'fashion-aksesoris',
             'seller_index' => 0,
-            'image' => 'product/1. Tas Bahu (Shoulder Bag) 1.png',
+            'primary_image' => 'product/1. Tas Bahu (Shoulder Bag) 1.png',
+            'images' => [
+                'product/1. Tas Bahu (Shoulder Bag) 1.png',
+                'product/1. Tas Bahu (Shoulder Bag) 2.png',
+            ],
         ],
         [
             'name' => 'Speaker Bluetooth Portabel',
@@ -32,7 +37,11 @@ class ProductSeeder extends Seeder
             'stock' => 20,
             'category_slug' => 'elektronik-gadget',
             'seller_index' => 0,
-            'image' => 'product/2. Speaker Bluetooth Portabel.jpg',
+            'primary_image' => 'product/2. Speaker Bluetooth Portabel.jpg',
+            'images' => [
+                'product/2. Speaker Bluetooth Portabel.jpg',
+                'product/2. Speaker Bluetooth Portabel 2.jpg',
+            ],
         ],
         [
             'name' => 'Smartphone Mid-range 128GB',
@@ -41,7 +50,11 @@ class ProductSeeder extends Seeder
             'stock' => 8,
             'category_slug' => 'elektronik-gadget',
             'seller_index' => 0,
-            'image' => 'product/3. Smartphone Mid-range 128GB.jpeg',
+            'primary_image' => 'product/3. Smartphone Mid-range 128GB.jpeg',
+            'images' => [
+                'product/3. Smartphone Mid-range 128GB.jpeg',
+                'product/3. Smartphone Mid-range 128GB 2.jpg',
+            ],
         ],
         [
             'name' => 'Set Cat Akrilik 12 Warna',
@@ -50,7 +63,11 @@ class ProductSeeder extends Seeder
             'stock' => 30,
             'category_slug' => 'kerajinan-seni',
             'seller_index' => 0,
-            'image' => 'product/4. Set Cat Akrilik 12 Warna 2.jpg',
+            'primary_image' => 'product/4. Set Cat Akrilik 12 JPG.jpg',
+            'images' => [
+                'product/4. Set Cat Akrilik 12 JPG.jpg',
+                'product/4. Set Cat Akrilik 12 Warna 2.jpg',
+            ],
         ],
         
         // Seller 2 - Muhamad Sahal Annabil (4 produk)
@@ -61,7 +78,11 @@ class ProductSeeder extends Seeder
             'stock' => 12,
             'category_slug' => 'rumah-dekorasi',
             'seller_index' => 1,
-            'image' => 'product/5. Rak Buku Minimalis.jpg',
+            'primary_image' => 'product/5. Rak Buku Minimalis.jpg',
+            'images' => [
+                'product/5. Rak Buku Minimalis.jpg',
+                'product/5. Rak Buku Minimalis 2.jpeg',
+            ],
         ],
         [
             'name' => 'Pengharum Mobil Aroma Kopi',
@@ -70,7 +91,11 @@ class ProductSeeder extends Seeder
             'stock' => 50,
             'category_slug' => 'otomotif',
             'seller_index' => 1,
-            'image' => 'product/6. Pengharum Mobil Aroma Kopi 3.jpg',
+            'primary_image' => 'product/6. Pengharum Mobil Aroma Kopi 3.jpg',
+            'images' => [
+                'product/6. Pengharum Mobil Aroma 2 JPEG.jpeg',
+                'product/6. Pengharum Mobil Aroma Kopi 3.jpg',
+            ],
         ],
         [
             'name' => 'Mobil Remote Control Off-Road',
@@ -79,7 +104,12 @@ class ProductSeeder extends Seeder
             'stock' => 10,
             'category_slug' => 'hobi-olahraga',
             'seller_index' => 1,
-            'image' => 'product/7. Mobil Remote Control Off-Road.jpg',
+            'primary_image' => 'product/7. Mobil Remote Control Off-Road.jpg',
+            'images' => [
+                'product/7. Mobil Remote Control Off-Road.jpg',
+                'product/7. Mobil Remote Control Off-Road 2.jpg',
+                'product/7. Mobil Remote Control Off-Road 3.jpg',
+            ],
         ],
         [
             'name' => 'Meja Kerja',
@@ -88,7 +118,11 @@ class ProductSeeder extends Seeder
             'stock' => 6,
             'category_slug' => 'rumah-dekorasi',
             'seller_index' => 1,
-            'image' => 'product/8. Merja Kerja PNG.png',
+            'primary_image' => 'product/8. Merja Kerja PNG.png',
+            'images' => [
+                'product/8. Merja Kerja PNG.png',
+                'product/8. Meja Kerja PNG 2.png',
+            ],
         ],
         
         // Seller 3 - Ivan Pratomo Soelistio (4 produk)
@@ -99,7 +133,11 @@ class ProductSeeder extends Seeder
             'stock' => 25,
             'category_slug' => 'hobi-olahraga',
             'seller_index' => 2,
-            'image' => 'product/9. Matras Yoga Anti-Slip.jpg',
+            'primary_image' => 'product/9. Matras Yoga Anti-Slip.jpg',
+            'images' => [
+                'product/9. Matras Yoga Anti-Slip.jpg',
+                'product/9. Matras Yoga Anti-Slip 2.jpg',
+            ],
         ],
         [
             'name' => 'Keripik Tempe Sagu 250g',
@@ -108,7 +146,11 @@ class ProductSeeder extends Seeder
             'stock' => 100,
             'category_slug' => 'makanan-minuman',
             'seller_index' => 2,
-            'image' => 'product/10. Keripik Tempe Sagu 250g.png',
+            'primary_image' => 'product/10. Keripik Tempe Sagu 250g.png',
+            'images' => [
+                'product/10. Keripik Tempe Sagu 250g.png',
+                'product/10. Keripik Tempe Sagu 250g 2.png',
+            ],
         ],
         [
             'name' => 'Headphone Noise Cancelling',
@@ -117,7 +159,11 @@ class ProductSeeder extends Seeder
             'stock' => 9,
             'category_slug' => 'elektronik-gadget',
             'seller_index' => 2,
-            'image' => 'product/11. Headphone Noise Cancelling.jpg',
+            'primary_image' => 'product/11. Headphone Noise Cancelling.jpg',
+            'images' => [
+                'product/11. Headphone Noise Cancelling.jpg',
+                'product/11. Headphone Noise Cancelling 2.jpg',
+            ],
         ],
         [
             'name' => 'Buku Filosofi Teras',
@@ -126,7 +172,11 @@ class ProductSeeder extends Seeder
             'stock' => 35,
             'category_slug' => 'buku-alat-tulis',
             'seller_index' => 2,
-            'image' => 'product/12. Buku Filosofi Teras.png',
+            'primary_image' => 'product/12. Buku Filosofi Teras.png',
+            'images' => [
+                'product/12. Buku Filosofi Teras.png',
+                'product/12. Buku Filosofi Teras 2.jpg',
+            ],
         ],
     ];
 
@@ -185,8 +235,8 @@ class ProductSeeder extends Seeder
                 'category_id' => $category->category_id,
                 'price' => $productData['price'],
                 'stock' => $productData['stock'],
-                'primary_image' => $productData['image'],
-                'images' => [$productData['image']],
+                'primary_image' => $productData['primary_image'],
+                'images' => $productData['images'],
                 'visitor' => 0,
                 'is_active' => true,
             ]);
