@@ -25,7 +25,8 @@ class ProductController extends Controller
         }
 
         $products = $seller->products()
-            ->select('product_id', 'name', 'slug', 'price', 'stock', 'images', 'is_active', 'created_at')
+            ->select('product_id', 'name', 'slug', 'price', 'stock', 'images', 'category_id', 'is_active', 'created_at')
+            ->with('category:category_id,name')
             ->orderBy('product_id', 'desc')
             ->get();
 
@@ -102,6 +103,9 @@ class ProductController extends Controller
         if ($product->seller_id !== $seller->seller_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+        // Load category relationship
+        $product->load('category:category_id,name');
 
         return response()->json($product);
     }

@@ -227,19 +227,23 @@ class ProductSeeder extends Seeder
                 continue;
             }
 
-            Product::create([
-                'seller_id' => $seller->seller_id,
-                'name' => $productData['name'],
-                'slug' => Str::slug($productData['name']),
-                'description' => $productData['description'],
-                'category_id' => $category->category_id,
-                'price' => $productData['price'],
-                'stock' => $productData['stock'],
-                'primary_image' => $productData['primary_image'],
-                'images' => $productData['images'],
-                'visitor' => 0,
-                'is_active' => true,
-            ]);
+            Product::updateOrCreate(
+                [
+                    'slug' => Str::slug($productData['name']),
+                ],
+                [
+                    'seller_id' => $seller->seller_id,
+                    'name' => $productData['name'],
+                    'description' => $productData['description'],
+                    'category_id' => $category->category_id,
+                    'price' => $productData['price'],
+                    'stock' => $productData['stock'],
+                    'primary_image' => $productData['primary_image'],
+                    'images' => $productData['images'],
+                    'visitor' => 0,
+                    'is_active' => true,
+                ]
+            );
         }
     }
 }
